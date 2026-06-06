@@ -23,8 +23,13 @@ function stripFences(text: string): string {
 }
 
 /** Best-effort extraction of the outermost JSON value if wrapped in prose. */
+function stripThink(text: string): string {
+  // Remove reasoning traces some models emit (e.g. Qwen3 <think>…</think>).
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+}
+
 function extractJson(text: string): string {
-  const t = stripFences(text);
+  const t = stripFences(stripThink(text));
   const firstObj = t.indexOf("{");
   const firstArr = t.indexOf("[");
   const candidates = [firstObj, firstArr].filter((i) => i >= 0);

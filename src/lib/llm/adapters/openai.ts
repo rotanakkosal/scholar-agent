@@ -14,6 +14,8 @@ export class OpenAIAdapter implements LLMClient {
     private readonly baseUrl: string,
     private readonly apiKey?: string,
     private readonly timeoutMs = 120_000,
+    /** Extra fields merged into every request body (e.g. vLLM chat_template_kwargs). */
+    private readonly extraBody?: Record<string, unknown>,
   ) {}
 
   /** Normalize so the path ends up as `<base>/v1/...` exactly once. */
@@ -43,6 +45,7 @@ export class OpenAIAdapter implements LLMClient {
         json_schema: { name: "structured_output", schema: opts.jsonSchema, strict: false },
       };
     }
+    if (this.extraBody) Object.assign(body, this.extraBody);
 
     const res = await fetch(this.url("/chat/completions"), {
       method: "POST",

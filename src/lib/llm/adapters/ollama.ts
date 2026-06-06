@@ -12,6 +12,8 @@ export class OllamaAdapter implements LLMClient {
     private readonly baseUrl: string,
     private readonly apiKey?: string,
     private readonly timeoutMs = 120_000,
+    /** Extra fields merged into every request body (e.g. Ollama think:false). */
+    private readonly extraBody?: Record<string, unknown>,
   ) {}
 
   private headers(): Record<string, string> {
@@ -25,7 +27,7 @@ export class OllamaAdapter implements LLMClient {
   }
 
   async chat(opts: ChatOptions): Promise<string> {
-    const body = {
+    const body: Record<string, unknown> = {
       model: opts.model,
       messages: opts.messages,
       stream: false,
@@ -38,6 +40,7 @@ export class OllamaAdapter implements LLMClient {
         ...(opts.maxTokens ? { num_predict: opts.maxTokens } : {}),
       },
     };
+    if (this.extraBody) Object.assign(body, this.extraBody);
 
     const res = await fetch(`${this.base()}/api/chat`, {
       method: "POST",

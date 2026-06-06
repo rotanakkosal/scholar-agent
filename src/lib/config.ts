@@ -28,6 +28,8 @@ export const config = {
     judgeModel: process.env.JUDGE_MODEL || "gemma2:9b",
     numCtx: num(process.env.LLM_NUM_CTX, 8192),
     timeoutMs: num(process.env.LLM_TIMEOUT_MS, 120_000),
+    /** Disable model "thinking" traces (e.g. Qwen3 <think>…</think>) for clean JSON. */
+    disableThinking: /^true$/i.test(process.env.LLM_DISABLE_THINKING ?? ""),
   },
   s2: {
     baseUrl: process.env.S2_BASE_URL || "https://api.semanticscholar.org/graph/v1",

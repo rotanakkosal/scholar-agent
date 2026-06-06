@@ -17,9 +17,16 @@ export function createLLMClient(overrides: LLMClientOverrides = {}): LLMClient {
   const apiKey = overrides.apiKey ?? config.llm.apiKey;
   const timeout = overrides.timeoutMs ?? config.llm.timeoutMs;
 
+  // Provider-specific knob to suppress "thinking" traces for clean structured output.
+  const extraBody = !config.llm.disableThinking
+    ? undefined
+    : provider === "openai"
+      ? { chat_template_kwargs: { enable_thinking: false } }
+      : { think: false };
+
   return provider === "openai"
-    ? new OpenAIAdapter(baseUrl, apiKey, timeout)
-    : new OllamaAdapter(baseUrl, apiKey, timeout);
+    ? new OpenAIAdapter(baseUrl, apiKey, timeout, extraBody)
+    : new OllamaAdapter(baseUrl, apiKey, timeout, extraBody);
 }
 
 export * from "./LLMClient";

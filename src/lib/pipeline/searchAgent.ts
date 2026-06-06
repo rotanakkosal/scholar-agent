@@ -60,13 +60,22 @@ export async function searchAgent(opts: SearchAgentOptions): Promise<Paper[]> {
 
     const perQuery = Math.max(5, Math.ceil((opts.topKHint * 3) / queries.length));
     for (const q of queries) {
-      const papers = await opts.s2.search(q, {
-        limit: perQuery,
-        year,
-        source: "keyword",
-        signal: opts.signal,
-      });
-      collected.push(...papers);
+      try {
+        const papers = await opts.s2.search(q, {
+          limit: perQuery,
+          year,
+          source: "keyword",
+          signal: opts.signal,
+        });
+        collected.push(...papers);
+      } catch (err) {
+        // A single query's failure (e.g. a 429) shouldn't abort the whole search.
+        opts.emit?.({
+          type: "log",
+          level: "warn",
+          message: `search failed for "${q}": ${(err as Error).message}`,
+        });
+      }
     }
   }
 
