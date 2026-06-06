@@ -1,0 +1,345 @@
+﻿
+
+KONG VUNGSOVANREACH
+
+-)$4%2- 02/*%#4 02/0/3!,
+
+SCHOLAR AGENT:
+
+AGENTIC PIPELINE FOR
+
+LITERATURE REVIEW
+
+SUBJECT : AI SYSTEM II (8836556-01)
+
+Professor: KOTB SHIMAA ABDELNABI ABDELHAKEEM
+
+April 06
+
+th
+
+, 2026
+
+Department: Big Data (
+
+⾖Ⓛ㣅䊁ṍ㥦
+
+)
+
+MEMBERS
+
+:
+
+1.
+
+CHHOR RATANAKTEPI
+
+|
+
+2025178006
+
+2.
+
+CHHUN ROTANAKKOSAL
+
+|
+
+2025278017
+
+3.
+
+CHIV KIMCHHOR
+
+|
+
+2026178003
+
+4.
+
+VORN NARO
+
+|
+
+2025278016
+
+INTRODUCTION
+
+METHODOLOGY
+
+EXPECTED RESULT
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+Table of Contents
+
+Introduction
+
+Problem and Motivation
+
+01
+
+01
+
+Research Methodology
+
+Proposed Method and Expected Result
+
+02
+
+02
+
+References
+
+Accessible References Used in the Presentation
+
+03
+
+04
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+01
+
+Introduction
+
+0jgZd]e Yf\ -glanYlagf
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+01
+
+01
+
+INTRODUCTION
+
+Challenges in manual literature review
+
+Ʊ
+
+Researchers face recurring obstacles when searching and synthesizing academic papers Î motivating the need
+
+for an AI agent pipeline
+
+[1]
+
+[2]
+
+.
+
+Proposed Solution
+
+Ʊ
+
+An AI agent pipeline queries academic APIs with
+
+auto-generated search terms to discover relevant
+
+papers at scale
+
+[3]
+
+Ʊ
+
+A Search Agent retrieves and ranks the top-K
+
+papers by metadata, removing the need for
+
+manual filtering
+
+[4]
+
+.
+
+Ʊ
+
+A Summary Agent extracts key information from
+
+each paper into a consistent structured format
+
+[5]
+
+.
+
+Ʊ
+
+An LLM as a Judge verifies that each output is
+
+accurate and faithful to the original paper before
+
+finalizing the output
+
+[6]
+
+.
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+02
+
+Research Methodology
+
+0jghgk]\ -]l`g\ Yf\ %ph][l]\ 2]kmdl
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+02
+
+02
+
+RESEARCH METHODOLOGY
+
+Proposed Method
+
+Figure 1.
+
+Scholar Agent System Architecture Diagram.
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+02
+
+03
+
+RESULT
+
+Expected Result
+
+Table 1.
+
+Result of PapersÓ Information Conducted by Agents.
+
+Our Limitations
+
+Ʊ
+
+There is no ground truth available to objectively verify whether the retrieved papers are truly the most relevant
+
+for a given query.
+
+Ʊ
+
+The LLM Judge cannot guarantee factual accuracy of summaries, as it relies solely on the model's own
+
+understanding of the paper.
+
+Ʊ
+
+The pipeline depends on a single language model for both summarization and evaluation, which may introduce
+
+some bias or blind spots across all outputs.
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+03
+
+References
+
+![[]kkaZd] 2]^]j]f[]k 5k]\ af l`] 0j]k]flYlagf
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+03
+
+04
+
+REFERENCES
+
+1.
+
+Gridach, M., Nanavati, J., El Abidine, K. Z., Mendes, L., & Mack, C. (2025). Agentic AI for scientific discovery: A survey of progress,
+
+challenges, and future directions. arXiv:2503.08979 [cs.CL].
+
+https://arxiv.org/abs/2503.08979
+
+2.
+
+Li, S., Huang, J., Zhuang, J., Shi, Y., Cai, X., Xu, M., Wang, X., Zhang, L., Ke, G., & Cai, H. (2024). SciLitLLM: How to adapt LLMs for
+
+scientific literature understanding. arXiv:2408.15545 [cs.LG].
+
+https://arxiv.org/abs/2408.15545
+
+3.
+
+Asai, A., Wu, Z., Wang, Y., Sil, A., & Hajishirzi, H. (2024). Self
+
+䈐
+
+RAG: Learning to retrieve, generate, and critique through self
+
+䈐
+
+reflection.
+
+In The Twelfth International Conference on Learning Representations (ICLR 2024).
+
+https://openreview.net/forum?id=hSyW5go0v8
+
+4.
+
+Gao, L., Ma, X., Callan, J., & Lin, J. (2023, July). Precise zero
+
+䈐
+
+shot dense retrieval without relevance labels. In Proceedings of the 61st
+
+Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) (pp. 1762Î1777).
+
+https://aclanthology.org/2023.acl-long.99/
+
+5.
+
+Carlini, N., Tramr, F., Wallace, E., Jagielski, M., Herbert
+
+䈐
+
+Voss, A., Lee, K., Roberts, A., Brown, T. B., Song, D., Erlingsson, ï., Oprea,
+
+A., & Raffel, C. (2021, August). Extracting training data from large language models. In 30th USENIX Security Symposium (USENIX
+
+Security 21) (pp. 2633Î2650). USENIX Association.
+
+https://www.usenix.org/conference/usenixsecurity21/presentation/carlini-extracting
+
+6.
+
+Pan, Y., Wang, Y., Li, Y., Liu, Y., & Zhang, W. (2026). A survey on LLM
+
+䈐
+
+as
+
+䈐
+
+a
+
+䈐
+
+judge. iScience, 29(1), 113956.
+
+https://doi.org/10.1016/j.isci.2025.101253
+
+----------PAGE BREAK----------
+
+KONG VUNGSOVANREACH
+
+Thank You!
+
+

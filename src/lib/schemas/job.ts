@@ -1,0 +1,38 @@
+import { z } from "zod";
+import { PaperSource } from "./paper";
+import { PaperSummarySchema } from "./summary";
+
+export const JobStatus = z.enum([
+  "queued",
+  "searching",
+  "summarizing",
+  "done",
+  "error",
+  "canceled",
+]);
+export type JobStatus = z.infer<typeof JobStatus>;
+
+/** Parameters that define a literature-review run. */
+export const JobParamsSchema = z.object({
+  query: z.string().min(3),
+  topK: z.number().int().min(1).max(20).default(5),
+  /** T — max Summary↔Judge refinement rounds. 0 = summarize once, no judging loop. */
+  maxRounds: z.number().int().min(0).max(5).default(2),
+  strategies: z.array(PaperSource).min(1).default(["keyword"]),
+  /** Override default models (else config.llm.summaryModel / judgeModel). */
+  summaryModel: z.string().optional(),
+  judgeModel: z.string().optional(),
+  yearFrom: z.number().int().nullable().default(null),
+});
+export type JobParams = z.infer<typeof JobParamsSchema>;
+
+export const ReviewJobSchema = z.object({
+  id: z.string(),
+  params: JobParamsSchema,
+  status: JobStatus,
+  createdAt: z.string(),
+  finishedAt: z.string().nullable().default(null),
+  result: z.array(PaperSummarySchema).nullable().default(null),
+  error: z.string().nullable().default(null),
+});
+export type ReviewJob = z.infer<typeof ReviewJobSchema>;
