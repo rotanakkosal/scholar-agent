@@ -14,4 +14,5 @@ export * from "./pipeline/rank";
 export * from "./pipeline/summaryAgent";
 export * from "./pipeline/judge";
 export * from "./pipeline/refineLoop";
+export * from "./pipeline/disagreements";
 export * from "./pipeline/runReview";

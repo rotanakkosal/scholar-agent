@@ -8,6 +8,7 @@ import type { ProgressEmitter } from "../schemas/events";
 import { searchAgent } from "./searchAgent";
 import { rankTopK } from "./rank";
 import { refinePaper } from "./refineLoop";
+import { findDisagreements } from "./disagreements";
 
 export interface RunReviewDeps {
   /** Worker/summary client (defaults to the configured LLM endpoint). */
@@ -102,6 +103,19 @@ export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}):
     emit?.({ type: "paper_done", paperId: paper.paperId, summary });
   }
   emit?.({ type: "phase", phase: "evaluation", state: "end" });
+
+  // --- Cross-paper disagreements (candidate, abstract-only; never blocks the run) ---
+  try {
+    const items = await findDisagreements(topK, {
+      llm,
+      model: summaryModel,
+      signal: deps.signal,
+    });
+    emit?.({ type: "disagreements", items });
+  } catch (err) {
+    emit?.({ type: "log", level: "warn", message: `disagreement check failed: ${(err as Error).message}` });
+  }
+
   emit?.({ type: "done", result: rows.map((r) => r.summary) });
   return rows;
 }

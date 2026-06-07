@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import type { ProgressEvent } from "@/lib/schemas/events";
 import type { PaperSummary } from "@/lib/schemas/summary";
 import type { JudgeVerdict } from "@/lib/schemas/judge";
+import type { Disagreement } from "@/lib/schemas/disagreement";
 
 export interface ReviewParams {
   query: string;
@@ -30,6 +31,7 @@ export interface ReviewState {
   paperOrder: string[];
   papers: Record<string, PaperProgress>;
   results: PaperSummary[];
+  disagreements: Disagreement[];
   error?: string;
   foundCount?: number;
   keptCount?: number;
@@ -41,6 +43,7 @@ const EMPTY: ReviewState = {
   paperOrder: [],
   papers: {},
   results: [],
+  disagreements: [],
 };
 
 function reduce(state: ReviewState, evt: ProgressEvent): ReviewState {
@@ -84,6 +87,8 @@ function reduce(state: ReviewState, evt: ProgressEvent): ReviewState {
         papers: { ...state.papers, [evt.paperId]: { ...p, summary: evt.summary } },
       };
     }
+    case "disagreements":
+      return { ...state, disagreements: evt.items };
     case "done":
       return { ...state, results: evt.result };
     case "log":

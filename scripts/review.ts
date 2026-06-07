@@ -38,6 +38,17 @@ function printEvent(e: ProgressEventInput): void {
     case "paper_done":
       console.error("     ✓ done");
       break;
+    case "disagreements":
+      if (e.items.length === 0) {
+        console.error("\n[disagreements] none clearly found across abstracts");
+      } else {
+        console.error(`\n[disagreements] ${e.items.length} possible (from abstracts — verify):`);
+        for (const d of e.items) {
+          console.error(`  • ${d.topic}`);
+          for (const s of d.sides) console.error(`     - ${s.title}: "${s.quote}"`);
+        }
+      }
+      break;
     case "log":
       console.error(`  ${e.level}: ${e.message}`);
       break;

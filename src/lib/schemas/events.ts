@@ -3,6 +3,7 @@ import { PaperSource } from "./paper";
 import { PaperSummarySchema } from "./summary";
 import { JudgeVerdictSchema } from "./judge";
 import { JobStatus } from "./job";
+import { DisagreementSchema } from "./disagreement";
 
 /**
  * Discriminated union of progress events streamed to the client (SSE) and
@@ -53,6 +54,11 @@ export const ProgressEventSchema = z.discriminatedUnion("type", [
     type: z.literal("log"),
     level: z.enum(["info", "warn", "error"]),
     message: z.string(),
+    ts: z.string(),
+  }),
+  z.object({
+    type: z.literal("disagreements"),
+    items: z.array(DisagreementSchema),
     ts: z.string(),
   }),
   z.object({ type: z.literal("error"), message: z.string(), ts: z.string() }),
