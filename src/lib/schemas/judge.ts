@@ -29,9 +29,11 @@ export const JudgeDraftSchema = z.object({
 });
 export type JudgeDraft = z.infer<typeof JudgeDraftSchema>;
 
-/** Full verdict = the LLM's draft + code-computed pass/overall. */
+/** Full verdict = the LLM's draft + code-computed pass / overall / grounding. */
 export const JudgeVerdictSchema = JudgeDraftSchema.extend({
   pass: z.boolean(),
   overall: z.number(),
+  /** Deterministic abstract-grounding score in [0,1] (model-independent). */
+  faithfulnessOverlap: z.number(),
 });
 export type JudgeVerdict = z.infer<typeof JudgeVerdictSchema>;

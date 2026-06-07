@@ -53,6 +53,7 @@ async function main(): Promise<void> {
   console.log("  contribution:", res.draft.contribution);
   console.log(
     `\nrounds=${res.rounds} pass=${res.verdict.pass} overall=${res.verdict.overall.toFixed(2)} ` +
+      `grounding=${(res.verdict.faithfulnessOverlap * 100).toFixed(0)}% ` +
       `(${((Date.now() - t0) / 1000).toFixed(1)}s)`,
   );
 }

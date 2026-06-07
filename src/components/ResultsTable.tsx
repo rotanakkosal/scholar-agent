@@ -97,6 +97,11 @@ export function ResultsTable({ state }: { state: ReviewState }) {
                   <td className="py-2 pr-3 text-zinc-600 dark:text-zinc-300">{s.contribution}</td>
                   <td className="py-2 pr-3">
                     <ScoreBadge verdict={verdict} />
+                    {verdict && (
+                      <div className="mt-0.5 text-xs text-zinc-400">
+                        grounding {Math.round(verdict.faithfulnessOverlap * 100)}%
+                      </div>
+                    )}
                     {s.revisions > 0 && (
                       <div className="mt-0.5 text-xs text-zinc-400">{s.revisions} rev</div>
                     )}

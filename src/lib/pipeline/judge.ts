@@ -4,6 +4,7 @@ import { JUDGE_SYSTEM, judgeUser } from "../llm/prompts/judge.prompt";
 import { JudgeDraftSchema, type JudgeVerdict } from "../schemas/judge";
 import type { Paper } from "../schemas/paper";
 import type { SummaryDraft } from "../schemas/summary";
+import { groundedness } from "../eval/faithfulness";
 
 export interface JudgeDeps {
   llm: LLMClient;
@@ -44,5 +45,10 @@ export async function judge(paper: Paper, draft: SummaryDraft, deps: JudgeDeps):
     result.unsupportedClaims.length === 0 &&
     overall >= t.overall;
 
-  return { ...result, overall, pass };
+  const faithfulnessOverlap = groundedness(
+    `${draft.methodology} ${draft.contribution}`,
+    paper.abstract,
+  );
+
+  return { ...result, overall, pass, faithfulnessOverlap };
 }

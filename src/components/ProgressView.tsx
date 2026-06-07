@@ -49,7 +49,8 @@ export function ProgressView({ state }: { state: ReviewState }) {
               {last && (
                 <span className="text-xs text-zinc-500">
                   C{last.scores.clarity.score} K{last.scores.keyFinding.score} F
-                  {last.scores.faithfulness.score} X{last.scores.consistency.score}
+                  {last.scores.faithfulness.score} X{last.scores.consistency.score} · grounding{" "}
+                  {Math.round(last.faithfulnessOverlap * 100)}%
                 </span>
               )}
             </div>
