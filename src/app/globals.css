@@ -1,35 +1,151 @@
 @import "tailwindcss";
 
+/*
+ * Scholar Agent design system — "soft studio"
+ * Warm light-gray canvas, floating rounded panels, coral accent on ink.
+ * Inspired by the reference financial-dashboard aesthetic.
+ */
 :root {
-  --background: #fafafa;
-  --foreground: #18181b;
+  --radius: 1rem;
+
+  /* Surfaces */
+  --canvas: #e8e6e2; /* outer page background (warm gray) */
+  --background: #faf9f7; /* main app panel */
+  --foreground: #1d1b19; /* ink */
+  --card: #ffffff;
+  --card-foreground: #1d1b19;
+  --popover: #ffffff;
+  --popover-foreground: #1d1b19;
+
+  /* Primary = ink (black pills/buttons) */
+  --primary: #1d1b19;
+  --primary-foreground: #faf9f7;
+
+  /* Brand accent = coral */
+  --coral: #ea6a45;
+  --coral-foreground: #ffffff;
+  --coral-soft: #fbe7dd; /* tinted background */
+  --coral-strong: #d8542f;
+
+  /* Neutral surfaces */
+  --secondary: #f2f0ec;
+  --secondary-foreground: #1d1b19;
+  --muted: #f2f0ec;
+  --muted-foreground: #8c867d;
+  --accent: #efece7; /* hover surface */
+  --accent-foreground: #1d1b19;
+
+  /* Status */
+  --success: #4f9d69;
+  --success-soft: #e4f1e8;
+  --warning: #d98a2b;
+  --warning-soft: #f8ecd9;
+  --destructive: #d8493b;
+  --destructive-soft: #f8e2df;
+
+  /* Lines / focus */
+  --border: #ebe8e3;
+  --input: #e6e2db;
+  --ring: #ea6a45;
 }
 
 @theme inline {
+  --color-canvas: var(--canvas);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090b;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-coral: var(--coral);
+  --color-coral-foreground: var(--coral-foreground);
+  --color-coral-soft: var(--coral-soft);
+  --color-coral-strong: var(--coral-strong);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Rounder than stock shadcn to match the reference's pillowy cards */
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  /* Soft, diffuse shadows (override stock sm/md so existing classes inherit the look) */
+  --shadow-sm: 0 1px 2px rgba(28, 24, 22, 0.04), 0 10px 26px -18px rgba(28, 24, 22, 0.18);
+  --shadow-md: 0 2px 6px rgba(28, 24, 22, 0.05), 0 22px 46px -24px rgba(28, 24, 22, 0.24);
+  --shadow-soft: 0 1px 2px rgba(28, 24, 22, 0.04), 0 14px 34px -20px rgba(28, 24, 22, 0.2);
+
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
+  background: var(--canvas);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--coral-soft);
+  color: var(--coral-strong);
+}
+
+/*
+ * Tailwind v4's Preflight drops the default pointer cursor on buttons.
+ * Restore situation-appropriate cursors across the app in one place.
+ */
+@layer base {
+  button,
+  [role="button"],
+  a[href],
+  summary,
+  label[for],
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled,
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
+}
+
+/* Coral range sliders */
+input[type="range"] {
+  accent-color: var(--coral);
 }
 
 /* Disciplined motion: a gentle entrance for cards/results. */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -38,7 +154,7 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeInUp 0.35s ease-out both;
+  animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
