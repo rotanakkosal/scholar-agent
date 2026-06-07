@@ -36,10 +36,14 @@
   --accent-foreground: #1d1b19;
 
   /* Status */
-  --success: #4f9d69;
-  --success-soft: #e4f1e8;
+  --success: #2f9e44;
+  --success-soft: #e6f7ec;
   --warning: #d98a2b;
   --warning-soft: #f8ecd9;
+  --violet: #6741d9;
+  --violet-soft: #ece9fb;
+  --pink: #e64980;
+  --pink-soft: #fde9f1;
   --destructive: #d8493b;
   --destructive-soft: #f8e2df;
 
@@ -77,6 +81,10 @@
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
+  --color-pink: var(--pink);
+  --color-pink-soft: var(--pink-soft);
   --color-destructive: var(--destructive);
   --color-destructive-soft: var(--destructive-soft);
 

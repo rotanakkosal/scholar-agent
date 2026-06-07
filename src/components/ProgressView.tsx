@@ -111,8 +111,10 @@ export function ProgressView({ state }: { state: ReviewState }) {
                     <span
                       key={i}
                       title={v.feedback}
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        v.pass ? "bg-success-soft text-success" : "bg-warning-soft text-warning"
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                        v.pass
+                          ? "border-success/25 bg-success-soft text-success"
+                          : "border-warning/25 bg-warning-soft text-warning"
                       }`}
                     >
                       r{i + 1} {v.pass ? "pass" : "fail"} {v.overall.toFixed(1)}

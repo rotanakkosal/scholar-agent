@@ -13,31 +13,22 @@ type Row = {
 };
 type SortKey = "score" | "year" | "grounding";
 
+// Solid badges: strong color fill, white text, no border.
+const BADGE = "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold";
+const TONE = {
+  success: "bg-success text-white",
+  danger: "bg-destructive text-white",
+  violet: "bg-violet text-white",
+  pink: "bg-pink text-white",
+  neutral: "bg-secondary text-secondary-foreground",
+} as const;
+
 function VerdictBadge({ verdict }: { verdict?: JudgeVerdict }) {
   if (!verdict) return null;
   return (
-    <span
-      title={verdict.feedback}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-        verdict.pass ? "bg-success-soft text-success" : "bg-warning-soft text-warning"
-      }`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${verdict.pass ? "bg-success" : "bg-warning"}`} />
-      {verdict.pass ? "pass" : "fail"} {verdict.overall.toFixed(1)}/5
-    </span>
-  );
-}
-
-function Grounding({ pct }: { pct: number }) {
-  return (
-    <span
-      className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
-      title="Abstract grounding"
-    >
-      <span className="h-1.5 w-16 overflow-hidden rounded-full bg-border">
-        <span className="block h-full rounded-full bg-coral" style={{ width: `${pct}%` }} />
-      </span>
-      <span className="tabular-nums text-foreground">{pct}%</span>
+    <span title={verdict.feedback} className={`${BADGE} ${verdict.pass ? TONE.success : TONE.danger}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {verdict.pass ? "Pass" : "Fail"} {verdict.overall.toFixed(1)}/5
     </span>
   );
 }
@@ -48,25 +39,39 @@ function FaithBadge({ cf }: { cf?: ClaimFaithfulness | null }) {
   return (
     <span
       title="Claim-level faithfulness: summary claims supported by the abstract"
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-        allSupported ? "bg-success-soft text-success" : "bg-warning-soft text-warning"
-      }`}
+      className={`${BADGE} ${allSupported ? TONE.violet : TONE.danger}`}
     >
-      facts {cf.supported}/{cf.total}
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      Facts {cf.supported}/{cf.total}
+    </span>
+  );
+}
+
+function Grounding({ pct }: { pct: number }) {
+  return (
+    <span className={`${BADGE} ${TONE.pink}`} title="Abstract grounding">
+      <span className="h-1.5 w-12 overflow-hidden rounded-full bg-white/30">
+        <span className="block h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
+      </span>
+      <span className="tabular-nums">{pct}%</span>
     </span>
   );
 }
 
 function ClaimList({ cf }: { cf: ClaimFaithfulness }) {
   return (
-    <div className="mb-4">
-      <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-        Claim check — {cf.supported}/{cf.total} supported by the abstract
+    <div>
+      <div className="mb-3 text-xs font-bold uppercase tracking-wide text-coral-strong">
+        Claim check · {cf.supported}/{cf.total} supported by the abstract
       </div>
-      <ul className="space-y-1.5">
+      <ul className="space-y-2.5">
         {cf.claims.map((c, i) => (
-          <li key={i} className="flex items-start gap-2 text-xs leading-relaxed">
-            <span className={`mt-px shrink-0 font-bold ${c.supported ? "text-success" : "text-warning"}`}>
+          <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed">
+            <span
+              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${
+                c.supported ? "bg-success" : "bg-destructive"
+              }`}
+            >
               {c.supported ? "✓" : "✗"}
             </span>
             <span className="text-foreground">
@@ -217,37 +222,37 @@ export function ResultsTable({ state }: { state: ReviewState }) {
               key={paperId}
               className="animate-fade-in rounded-3xl border border-border bg-card p-6 shadow-sm transition hover:shadow-md"
             >
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="text-base font-bold leading-snug text-card-foreground">
-                  {s.doi ? (
-                    <a
-                      href={`https://doi.org/${s.doi}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="transition hover:text-coral-strong hover:underline"
-                    >
-                      {s.title}
-                    </a>
-                  ) : (
-                    s.title
+              <h3 className="text-base font-bold leading-snug text-card-foreground">
+                {s.doi ? (
+                  <a
+                    href={`https://doi.org/${s.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition hover:text-coral-strong hover:underline"
+                  >
+                    {s.title}
+                  </a>
+                ) : (
+                  s.title
+                )}
+              </h3>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground">
+                  <span className="tabular-nums">{s.publishedYear ?? "year n/a"}</span>
+                  {s.doi && <span className="truncate">· {s.doi}</span>}
+                  {s.revisions > 0 && <span>· {s.revisions} revision(s)</span>}
+                  {!s.abstractAvailable && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">
+                      no abstract
+                    </span>
                   )}
-                </h3>
-                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
                   <VerdictBadge verdict={verdict} />
                   <FaithBadge cf={cf} />
                   {verdict && <Grounding pct={pct} />}
                 </div>
-              </div>
-
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground">
-                <span className="tabular-nums">{s.publishedYear ?? "year n/a"}</span>
-                {s.doi && <span className="truncate">· {s.doi}</span>}
-                {s.revisions > 0 && <span>· {s.revisions} revision(s)</span>}
-                {!s.abstractAvailable && (
-                  <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">
-                    no abstract
-                  </span>
-                )}
               </div>
 
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
@@ -265,7 +270,8 @@ export function ResultsTable({ state }: { state: ReviewState }) {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-3">
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <CopyButton summary={s} />
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : paperId)}
@@ -273,35 +279,55 @@ export function ResultsTable({ state }: { state: ReviewState }) {
                 >
                   {isOpen ? "Hide details ↑" : "Show rubric & abstract ↓"}
                 </button>
-                <CopyButton summary={s} />
               </div>
 
-              {isOpen && (
-                <div className="mt-4 border-t border-border pt-4 text-sm">
-                  {cf && cf.total > 0 && <ClaimList cf={cf} />}
+              <div
+                className={`grid transition-all duration-300 ease-out motion-reduce:transition-none ${
+                  isOpen ? "mt-5 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+                aria-hidden={!isOpen}
+              >
+                <div className="overflow-hidden">
+                  <div className="flex flex-col gap-6 border-t border-border pt-5">
+                  {/* 1. Rubric — the judge's verdict, scannable first */}
                   {verdict && (
-                    <div className="mb-4 grid gap-2 sm:grid-cols-2">
-                      {(["clarity", "keyFinding", "faithfulness", "consistency"] as const).map(
-                        (d) => (
-                          <div
-                            key={d}
-                            className="rounded-xl border border-border bg-card px-3 py-2 text-xs text-muted-foreground"
-                          >
-                            <span className="font-bold capitalize text-foreground">
-                              {d} {verdict.scores[d].score}/5
-                            </span>{" "}
-                            — {verdict.scores[d].reason}
-                          </div>
-                        ),
-                      )}
+                    <div>
+                      <div className="mb-3 text-xs font-bold uppercase tracking-wide text-coral-strong">
+                        Rubric
+                      </div>
+                      <div className="grid gap-2.5 sm:grid-cols-2">
+                        {(["clarity", "keyFinding", "faithfulness", "consistency"] as const).map(
+                          (d) => (
+                            <div
+                              key={d}
+                              className="rounded-xl border border-border bg-card px-3.5 py-3 text-sm leading-relaxed text-muted-foreground"
+                            >
+                              <span className="font-bold capitalize text-foreground">
+                                {d} {verdict.scores[d].score}/5
+                              </span>{" "}
+                              — {verdict.scores[d].reason}
+                            </div>
+                          ),
+                        )}
+                      </div>
                     </div>
                   )}
-                  <div className="text-xs leading-relaxed text-muted-foreground">
-                    <span className="font-bold text-foreground">Abstract:</span>{" "}
-                    {s.abstract || "(none)"}
+
+                  {/* 2. Claim check — the grounding evidence */}
+                  {cf && cf.total > 0 && <ClaimList cf={cf} />}
+
+                  {/* 3. Abstract — the raw source, reference last */}
+                  <div>
+                    <div className="mb-2 text-xs font-bold uppercase tracking-wide text-coral-strong">
+                      Abstract
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {s.abstract || "(none)"}
+                    </p>
+                  </div>
                   </div>
                 </div>
-              )}
+              </div>
             </article>
           );
         })}
