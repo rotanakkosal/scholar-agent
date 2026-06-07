@@ -50,5 +50,6 @@ export async function judge(paper: Paper, draft: SummaryDraft, deps: JudgeDeps):
     paper.abstract,
   );
 
-  return { ...result, overall, pass, faithfulnessOverlap };
+  // claimFaithfulness is computed later (once, on the final draft) in runReview.
+  return { ...result, overall, pass, faithfulnessOverlap, claimFaithfulness: null };
 }

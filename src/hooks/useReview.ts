@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { ProgressEvent } from "@/lib/schemas/events";
 import type { PaperSummary } from "@/lib/schemas/summary";
-import type { JudgeVerdict } from "@/lib/schemas/judge";
+import type { JudgeVerdict, ClaimFaithfulness } from "@/lib/schemas/judge";
 import type { Disagreement } from "@/lib/schemas/disagreement";
 
 export interface ReviewParams {
@@ -21,6 +21,7 @@ export interface PaperProgress {
   total: number;
   rounds: JudgeVerdict[];
   summary?: PaperSummary;
+  claimFaithfulness?: ClaimFaithfulness | null;
 }
 
 export interface ReviewState {
@@ -84,7 +85,10 @@ function reduce(state: ReviewState, evt: ProgressEvent): ReviewState {
       if (!p) return state;
       return {
         ...state,
-        papers: { ...state.papers, [evt.paperId]: { ...p, summary: evt.summary } },
+        papers: {
+          ...state.papers,
+          [evt.paperId]: { ...p, summary: evt.summary, claimFaithfulness: evt.claimFaithfulness },
+        },
       };
     }
     case "disagreements":

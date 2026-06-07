@@ -8,6 +8,7 @@ import type { ProgressEmitter } from "../schemas/events";
 import { searchAgent } from "./searchAgent";
 import { rankTopK } from "./rank";
 import { refinePaper } from "./refineLoop";
+import { assessClaimFaithfulness } from "./claimFaithfulness";
 import { findDisagreements } from "./disagreements";
 
 export interface RunReviewDeps {
@@ -88,6 +89,23 @@ export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}):
         emit?.({ type: "summary_round", paperId: paper.paperId, round, verdict: v }),
     });
 
+    // Claim-level faithfulness on the final draft (RAGAS-style), via the judge
+    // model so the summarizer doesn't grade itself. Best-effort: never blocks.
+    let claimFaithfulness = null;
+    try {
+      claimFaithfulness = await assessClaimFaithfulness(draft, paper.abstract, {
+        llm: judgeLlm,
+        model: judgeModel,
+        signal: deps.signal,
+      });
+    } catch (err) {
+      emit?.({
+        type: "log",
+        level: "warn",
+        message: `claim-faithfulness failed for "${paper.title}": ${(err as Error).message}`,
+      });
+    }
+
     const summary: PaperSummary = {
       paperId: paper.paperId,
       title: paper.title,
@@ -99,8 +117,8 @@ export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}):
       revisions: Math.max(0, rounds - 1),
       abstractAvailable: !!paper.abstract,
     };
-    rows.push({ summary, verdict });
-    emit?.({ type: "paper_done", paperId: paper.paperId, summary });
+    rows.push({ summary, verdict: { ...verdict, claimFaithfulness } });
+    emit?.({ type: "paper_done", paperId: paper.paperId, summary, claimFaithfulness });
   }
   emit?.({ type: "phase", phase: "evaluation", state: "end" });
 

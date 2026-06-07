@@ -37,11 +37,35 @@ export const JudgeDraftSchema = z.object({
 });
 export type JudgeDraft = z.infer<typeof JudgeDraftSchema>;
 
+/** One atomic claim extracted from the summary and checked against the abstract. */
+export const ClaimCheckSchema = z.object({
+  claim: z.string(),
+  supported: z.boolean(),
+  reason: z.string().default(""),
+});
+export type ClaimCheck = z.infer<typeof ClaimCheckSchema>;
+
+/**
+ * Claim-level faithfulness (RAGAS / FActScore style): the summary is decomposed
+ * into atomic claims, each verified against the abstract; score = supported/total.
+ * Richer and more accurate than lexical overlap, and produces an explainable list.
+ */
+export const ClaimFaithfulnessSchema = z.object({
+  /** supported / total, in [0,1]. */
+  score: z.number(),
+  supported: z.number().int(),
+  total: z.number().int(),
+  claims: z.array(ClaimCheckSchema),
+});
+export type ClaimFaithfulness = z.infer<typeof ClaimFaithfulnessSchema>;
+
 /** Full verdict = the LLM's draft + code-computed pass / overall / grounding. */
 export const JudgeVerdictSchema = JudgeDraftSchema.extend({
   pass: z.boolean(),
   overall: z.number(),
-  /** Deterministic abstract-grounding score in [0,1] (model-independent). */
+  /** Deterministic lexical abstract-grounding score in [0,1] (model-independent). */
   faithfulnessOverlap: z.number(),
+  /** Claim-level faithfulness (null if not computed / no abstract). */
+  claimFaithfulness: ClaimFaithfulnessSchema.nullable().default(null),
 });
 export type JudgeVerdict = z.infer<typeof JudgeVerdictSchema>;

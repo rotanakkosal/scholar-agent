@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { PaperSource } from "./paper";
 import { PaperSummarySchema } from "./summary";
-import { JudgeVerdictSchema } from "./judge";
+import { JudgeVerdictSchema, ClaimFaithfulnessSchema } from "./judge";
 import { JobStatus } from "./job";
 import { DisagreementSchema } from "./disagreement";
 
@@ -48,6 +48,7 @@ export const ProgressEventSchema = z.discriminatedUnion("type", [
     type: z.literal("paper_done"),
     paperId: z.string(),
     summary: PaperSummarySchema,
+    claimFaithfulness: ClaimFaithfulnessSchema.nullable().default(null),
     ts: z.string(),
   }),
   z.object({
