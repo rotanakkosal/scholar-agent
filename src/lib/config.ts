@@ -64,14 +64,19 @@ export const config = {
     maxOutputTokens: 1024,
   },
   rubric: {
-    version: "v1",
-    /** A summary "passes" only if every gate below is satisfied. */
+    version: "v2",
+    /**
+     * A summary "passes" only if every gate below is satisfied. Calibrated to the
+     * critical-reviewer judge (v2 prompt), whose honest scores spread across 3–5
+     * for good summaries — so the gate is ≥3 per dimension and ≥3.5 overall, which
+     * cleanly separates good (~4.3) from hallucinated (~1.5) summaries.
+     */
     thresholds: {
-      clarity: 4,
-      keyFinding: 4,
-      faithfulness: 4,
-      consistency: 4,
-      overall: 4.0,
+      clarity: 3,
+      keyFinding: 3,
+      faithfulness: 3,
+      consistency: 3,
+      overall: 3.5,
     },
   },
   prompts: {

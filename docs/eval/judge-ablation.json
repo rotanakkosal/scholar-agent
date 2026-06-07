@@ -3,38 +3,38 @@
   "summaryModel": "qwen3-14b",
   "perJudge": {
     "qwen3-14b": {
-      "goodPassRate": 0,
+      "goodPassRate": 0.625,
       "badPassRate": 0,
-      "detectionAccuracy": 0.5,
-      "meanScoreGap": 2.9375,
-      "meanGoodOverall": 4.375,
-      "meanBadOverall": 1.4375
+      "detectionAccuracy": 0.8125,
+      "meanScoreGap": 2.78125,
+      "meanGoodOverall": 4.03125,
+      "meanBadOverall": 1.25
     },
     "gemma-4-e4b": {
-      "goodPassRate": 0.875,
+      "goodPassRate": 1,
       "badPassRate": 0,
-      "detectionAccuracy": 0.9375,
-      "meanScoreGap": 3.375,
-      "meanGoodOverall": 4.875,
-      "meanBadOverall": 1.5
+      "detectionAccuracy": 1,
+      "meanScoreGap": 2.75,
+      "meanGoodOverall": 4.28125,
+      "meanBadOverall": 1.53125
     }
   },
   "perCase": [
     {
       "paperId": "659bf9ce7175e1ec266ff54359e2bd76e0b7ff31",
       "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
-      "goodGrounding": 0.8431372549019608,
+      "goodGrounding": 0.8596491228070176,
       "badGrounding": 0.16666666666666666,
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4.5,
+            "overall": 4,
             "pass": false,
-            "faithfulness": 3,
+            "faithfulness": 4,
             "unsupported": 2
           },
           "bad": {
-            "overall": 1.5,
+            "overall": 1.25,
             "pass": false,
             "faithfulness": 1,
             "unsupported": 2
@@ -42,7 +42,7 @@
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 5,
+            "overall": 4.75,
             "pass": true,
             "faithfulness": 5,
             "unsupported": 0
@@ -51,7 +51,7 @@
             "overall": 1.5,
             "pass": false,
             "faithfulness": 1,
-            "unsupported": 2
+            "unsupported": 3
           }
         }
       }
@@ -64,13 +64,13 @@
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4.5,
-            "pass": false,
-            "faithfulness": 3,
-            "unsupported": 2
+            "overall": 4,
+            "pass": true,
+            "faithfulness": 4,
+            "unsupported": 0
           },
           "bad": {
-            "overall": 1.5,
+            "overall": 1.25,
             "pass": false,
             "faithfulness": 1,
             "unsupported": 2
@@ -78,7 +78,7 @@
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 5,
+            "overall": 4.75,
             "pass": true,
             "faithfulness": 5,
             "unsupported": 0
@@ -100,27 +100,27 @@
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4,
-            "pass": false,
-            "faithfulness": 3,
-            "unsupported": 1
-          },
-          "bad": {
-            "overall": 1.5,
-            "pass": false,
-            "faithfulness": 1,
-            "unsupported": 2
-          }
-        },
-        "gemma-4-e4b": {
-          "good": {
-            "overall": 5,
+            "overall": 4.5,
             "pass": true,
             "faithfulness": 5,
             "unsupported": 0
           },
           "bad": {
-            "overall": 1.5,
+            "overall": 1.25,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 4
+          }
+        },
+        "gemma-4-e4b": {
+          "good": {
+            "overall": 4.5,
+            "pass": true,
+            "faithfulness": 5,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.75,
             "pass": false,
             "faithfulness": 1,
             "unsupported": 2
@@ -131,29 +131,29 @@
     {
       "paperId": "204e3073870fae3d05bcbc2f6a8e263d9b72e776",
       "title": "Attention is All you Need",
-      "goodGrounding": 0.7714285714285715,
+      "goodGrounding": 0.7428571428571429,
       "badGrounding": 0.4782608695652174,
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4.5,
+            "overall": 3.75,
             "pass": false,
             "faithfulness": 3,
-            "unsupported": 2
+            "unsupported": 1
           },
           "bad": {
             "overall": 1.25,
             "pass": false,
             "faithfulness": 1,
-            "unsupported": 3
+            "unsupported": 4
           }
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 4,
-            "pass": false,
+            "overall": 3.5,
+            "pass": true,
             "faithfulness": 3,
-            "unsupported": 1
+            "unsupported": 0
           },
           "bad": {
             "overall": 1.5,
@@ -167,26 +167,26 @@
     {
       "paperId": "2c03df8b48bf3fa39054345bafabfeff15bfd11d",
       "title": "Deep Residual Learning for Image Recognition",
-      "goodGrounding": 0.6410256410256411,
+      "goodGrounding": 0.7105263157894737,
       "badGrounding": 0.2727272727272727,
       "judges": {
         "qwen3-14b": {
           "good": {
             "overall": 4.5,
-            "pass": false,
-            "faithfulness": 3,
+            "pass": true,
+            "faithfulness": 4,
             "unsupported": 0
           },
           "bad": {
-            "overall": 1,
+            "overall": 1.25,
             "pass": false,
             "faithfulness": 1,
-            "unsupported": 3
+            "unsupported": 4
           }
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 5,
+            "overall": 4.25,
             "pass": true,
             "faithfulness": 5,
             "unsupported": 0
@@ -195,7 +195,7 @@
             "overall": 1.5,
             "pass": false,
             "faithfulness": 1,
-            "unsupported": 4
+            "unsupported": 2
           }
         }
       }
@@ -203,18 +203,18 @@
     {
       "paperId": "df2b0e26d0599ce3e70df8a9da02e51594e0e992",
       "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
-      "goodGrounding": 0.8666666666666667,
+      "goodGrounding": 0.8571428571428571,
       "badGrounding": 0.36363636363636365,
       "judges": {
         "qwen3-14b": {
           "good": {
             "overall": 4,
-            "pass": false,
-            "faithfulness": 3,
+            "pass": true,
+            "faithfulness": 4,
             "unsupported": 0
           },
           "bad": {
-            "overall": 1.5,
+            "overall": 1.25,
             "pass": false,
             "faithfulness": 1,
             "unsupported": 5
@@ -222,7 +222,7 @@
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 5,
+            "overall": 4.25,
             "pass": true,
             "faithfulness": 5,
             "unsupported": 0
@@ -244,10 +244,10 @@
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4.5,
+            "overall": 3.25,
             "pass": false,
             "faithfulness": 3,
-            "unsupported": 0
+            "unsupported": 3
           },
           "bad": {
             "overall": 1.25,
@@ -258,9 +258,9 @@
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 5,
+            "overall": 3.75,
             "pass": true,
-            "faithfulness": 5,
+            "faithfulness": 3,
             "unsupported": 0
           },
           "bad": {
@@ -275,18 +275,18 @@
     {
       "paperId": "995c5f5e62614fcb4d2796ad2faab969da51713e",
       "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
-      "goodGrounding": 0.75,
+      "goodGrounding": 0.6666666666666666,
       "badGrounding": 0.36,
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4.5,
-            "pass": false,
-            "faithfulness": 3,
-            "unsupported": 2
+            "overall": 4.25,
+            "pass": true,
+            "faithfulness": 4,
+            "unsupported": 0
           },
           "bad": {
-            "overall": 2,
+            "overall": 1.25,
             "pass": false,
             "faithfulness": 1,
             "unsupported": 2
@@ -294,7 +294,7 @@
         },
         "gemma-4-e4b": {
           "good": {
-            "overall": 5,
+            "overall": 4.5,
             "pass": true,
             "faithfulness": 5,
             "unsupported": 0
@@ -303,7 +303,7 @@
             "overall": 1.5,
             "pass": false,
             "faithfulness": 1,
-            "unsupported": 3
+            "unsupported": 2
           }
         }
       }
