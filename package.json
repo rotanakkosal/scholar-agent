@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "health": "tsx scripts/health.ts"
+    "health": "tsx scripts/health.ts",
+    "benchmark": "tsx scripts/benchmark.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "next": "16.2.7",
@@ -26,6 +28,7 @@
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.0.0"
   }
 }
