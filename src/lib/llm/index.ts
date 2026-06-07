@@ -8,6 +8,8 @@ export interface LLMClientOverrides {
   baseUrl?: string;
   apiKey?: string;
   timeoutMs?: number;
+  /** Suppress "thinking" traces (Qwen3). Must be per-client — Gemma rejects the kwarg. */
+  disableThinking?: boolean;
 }
 
 /** Build an LLM client for the configured (or overridden) provider. */
@@ -16,9 +18,10 @@ export function createLLMClient(overrides: LLMClientOverrides = {}): LLMClient {
   const baseUrl = overrides.baseUrl ?? config.llm.baseUrl;
   const apiKey = overrides.apiKey ?? config.llm.apiKey;
   const timeout = overrides.timeoutMs ?? config.llm.timeoutMs;
+  const disableThinking = overrides.disableThinking ?? config.llm.disableThinking;
 
   // Provider-specific knob to suppress "thinking" traces for clean structured output.
-  const extraBody = !config.llm.disableThinking
+  const extraBody = !disableThinking
     ? undefined
     : provider === "openai"
       ? { chat_template_kwargs: { enable_thinking: false } }

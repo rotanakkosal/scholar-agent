@@ -25,10 +25,17 @@ async function main(): Promise<void> {
   const llm = createLLMClient();
   const t0 = Date.now();
 
+  const judgeClient = createLLMClient({
+    provider: config.judge.provider,
+    baseUrl: config.judge.baseUrl,
+    apiKey: config.judge.apiKey,
+    disableThinking: config.judge.disableThinking,
+  });
   const res = await refinePaper(paper, {
-    llm,
+    summaryClient: llm,
     summaryModel: config.llm.summaryModel,
-    judgeModel: config.llm.judgeModel,
+    judgeClient,
+    judgeModel: config.judge.model,
     maxRounds: config.pipeline.maxRounds,
     onRound: (round, v) => {
       const s = v.scores;

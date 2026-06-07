@@ -10,7 +10,10 @@ import { rankTopK } from "./rank";
 import { refinePaper } from "./refineLoop";
 
 export interface RunReviewDeps {
+  /** Worker/summary client (defaults to the configured LLM endpoint). */
   llm?: LLMClient;
+  /** Judge client (defaults to the configured judge endpoint — e.g. Gemma). */
+  judgeLlm?: LLMClient;
   s2?: SemanticScholarClient;
   emit?: ProgressEmitter;
   signal?: AbortSignal;
@@ -29,10 +32,18 @@ export interface ReviewRow {
 export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}): Promise<ReviewRow[]> {
   const params = JobParamsSchema.parse(rawParams);
   const llm = deps.llm ?? createLLMClient();
+  const judgeLlm =
+    deps.judgeLlm ??
+    createLLMClient({
+      provider: config.judge.provider,
+      baseUrl: config.judge.baseUrl,
+      apiKey: config.judge.apiKey,
+      disableThinking: config.judge.disableThinking,
+    });
   const s2 = deps.s2 ?? new SemanticScholarClient();
   const emit = deps.emit;
   const summaryModel = params.summaryModel ?? config.llm.summaryModel;
-  const judgeModel = params.judgeModel ?? config.llm.judgeModel;
+  const judgeModel = params.judgeModel ?? config.judge.model;
 
   // --- Search Phase ---
   emit?.({ type: "phase", phase: "search", state: "start" });
@@ -66,8 +77,9 @@ export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}):
     });
 
     const { draft, verdict, rounds } = await refinePaper(paper, {
-      llm,
+      summaryClient: llm,
       summaryModel,
+      judgeClient: judgeLlm,
       judgeModel,
       maxRounds: params.maxRounds,
       signal: deps.signal,

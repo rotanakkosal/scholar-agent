@@ -31,6 +31,21 @@ export const config = {
     /** Disable model "thinking" traces (e.g. Qwen3 <think>…</think>) for clean JSON. */
     disableThinking: /^true$/i.test(process.env.LLM_DISABLE_THINKING ?? ""),
   },
+  /**
+   * The judge runs on its own endpoint/model so a DIFFERENT model family can
+   * evaluate the summarizer's output (mitigates single-model / self-enhancement
+   * bias). Falls back to the worker LLM if JUDGE_LLM_* are unset.
+   */
+  judge: {
+    provider:
+      (process.env.JUDGE_LLM_PROVIDER as LLMProvider) ||
+      (process.env.LLM_PROVIDER as LLMProvider) ||
+      "ollama",
+    baseUrl: process.env.JUDGE_LLM_BASE_URL || process.env.LLM_BASE_URL || "http://localhost:11434",
+    apiKey: process.env.JUDGE_LLM_API_KEY || process.env.LLM_API_KEY || undefined,
+    model: process.env.JUDGE_MODEL || process.env.SUMMARY_MODEL || "gemma2:9b",
+    disableThinking: /^true$/i.test(process.env.JUDGE_LLM_DISABLE_THINKING ?? ""),
+  },
   s2: {
     baseUrl: process.env.S2_BASE_URL || "https://api.semanticscholar.org/graph/v1",
     apiKey: process.env.S2_API_KEY || undefined,

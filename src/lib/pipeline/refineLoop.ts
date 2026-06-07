@@ -6,8 +6,11 @@ import { summarize, revise } from "./summaryAgent";
 import { judge } from "./judge";
 
 export interface RefineDeps {
-  llm: LLMClient;
+  /** Client + model for the Summary Agent (the "worker", e.g. Qwen). */
+  summaryClient: LLMClient;
   summaryModel: string;
+  /** Client + model for the Judge — ideally a DIFFERENT family (e.g. Gemma). */
+  judgeClient: LLMClient;
   judgeModel: string;
   /** T — maximum judge rounds (each failing round triggers one revision). */
   maxRounds: number;
@@ -29,8 +32,8 @@ export interface RefineResult {
  * never make the final result worse.
  */
 export async function refinePaper(paper: Paper, deps: RefineDeps): Promise<RefineResult> {
-  const summaryDeps = { llm: deps.llm, model: deps.summaryModel, signal: deps.signal };
-  const judgeDeps = { llm: deps.llm, model: deps.judgeModel, signal: deps.signal };
+  const summaryDeps = { llm: deps.summaryClient, model: deps.summaryModel, signal: deps.signal };
+  const judgeDeps = { llm: deps.judgeClient, model: deps.judgeModel, signal: deps.signal };
 
   let draft = await summarize(paper, summaryDeps);
   let best: { draft: SummaryDraft; verdict: JudgeVerdict } | undefined;
