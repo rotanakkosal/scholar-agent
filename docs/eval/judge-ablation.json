@@ -1,21 +1,21 @@
 {
-  "cases": 3,
+  "cases": 8,
   "summaryModel": "qwen3-14b",
   "perJudge": {
     "qwen3-14b": {
       "goodPassRate": 0,
       "badPassRate": 0,
       "detectionAccuracy": 0.5,
-      "meanScoreGap": 2.9166666666666665,
-      "meanGoodOverall": 4.25,
-      "meanBadOverall": 1.3333333333333333
+      "meanScoreGap": 2.9375,
+      "meanGoodOverall": 4.375,
+      "meanBadOverall": 1.4375
     },
     "gemma-4-e4b": {
-      "goodPassRate": 1,
+      "goodPassRate": 0.875,
       "badPassRate": 0,
-      "detectionAccuracy": 1,
-      "meanScoreGap": 3.5,
-      "meanGoodOverall": 5,
+      "detectionAccuracy": 0.9375,
+      "meanScoreGap": 3.375,
+      "meanGoodOverall": 4.875,
       "meanBadOverall": 1.5
     }
   },
@@ -23,7 +23,7 @@
     {
       "paperId": "659bf9ce7175e1ec266ff54359e2bd76e0b7ff31",
       "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
-      "goodGrounding": 0.8596491228070176,
+      "goodGrounding": 0.8431372549019608,
       "badGrounding": 0.16666666666666666,
       "judges": {
         "qwen3-14b": {
@@ -34,7 +34,7 @@
             "unsupported": 2
           },
           "bad": {
-            "overall": 1,
+            "overall": 1.5,
             "pass": false,
             "faithfulness": 1,
             "unsupported": 2
@@ -51,7 +51,7 @@
             "overall": 1.5,
             "pass": false,
             "faithfulness": 1,
-            "unsupported": 3
+            "unsupported": 2
           }
         }
       }
@@ -64,7 +64,7 @@
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4,
+            "overall": 4.5,
             "pass": false,
             "faithfulness": 3,
             "unsupported": 2
@@ -95,15 +95,15 @@
     {
       "paperId": "46f9f7b8f88f72e12cbdb21e3311f995eb6e65c5",
       "title": "Retrieval-Augmented Generation for Large Language Models: A Survey",
-      "goodGrounding": 0.8085106382978723,
+      "goodGrounding": 0.7872340425531915,
       "badGrounding": 0.10344827586206896,
       "judges": {
         "qwen3-14b": {
           "good": {
-            "overall": 4.25,
+            "overall": 4,
             "pass": false,
-            "faithfulness": 4,
-            "unsupported": 0
+            "faithfulness": 3,
+            "unsupported": 1
           },
           "bad": {
             "overall": 1.5,
@@ -124,6 +124,186 @@
             "pass": false,
             "faithfulness": 1,
             "unsupported": 2
+          }
+        }
+      }
+    },
+    {
+      "paperId": "204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+      "title": "Attention is All you Need",
+      "goodGrounding": 0.7714285714285715,
+      "badGrounding": 0.4782608695652174,
+      "judges": {
+        "qwen3-14b": {
+          "good": {
+            "overall": 4.5,
+            "pass": false,
+            "faithfulness": 3,
+            "unsupported": 2
+          },
+          "bad": {
+            "overall": 1.25,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 3
+          }
+        },
+        "gemma-4-e4b": {
+          "good": {
+            "overall": 4,
+            "pass": false,
+            "faithfulness": 3,
+            "unsupported": 1
+          },
+          "bad": {
+            "overall": 1.5,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 3
+          }
+        }
+      }
+    },
+    {
+      "paperId": "2c03df8b48bf3fa39054345bafabfeff15bfd11d",
+      "title": "Deep Residual Learning for Image Recognition",
+      "goodGrounding": 0.6410256410256411,
+      "badGrounding": 0.2727272727272727,
+      "judges": {
+        "qwen3-14b": {
+          "good": {
+            "overall": 4.5,
+            "pass": false,
+            "faithfulness": 3,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 3
+          }
+        },
+        "gemma-4-e4b": {
+          "good": {
+            "overall": 5,
+            "pass": true,
+            "faithfulness": 5,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.5,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 4
+          }
+        }
+      }
+    },
+    {
+      "paperId": "df2b0e26d0599ce3e70df8a9da02e51594e0e992",
+      "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      "goodGrounding": 0.8666666666666667,
+      "badGrounding": 0.36363636363636365,
+      "judges": {
+        "qwen3-14b": {
+          "good": {
+            "overall": 4,
+            "pass": false,
+            "faithfulness": 3,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.5,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 5
+          }
+        },
+        "gemma-4-e4b": {
+          "good": {
+            "overall": 5,
+            "pass": true,
+            "faithfulness": 5,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.5,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 2
+          }
+        }
+      }
+    },
+    {
+      "paperId": "a6cb366736791bcccc5c8639de5a8f9636bf87e8",
+      "title": "Adam: A Method for Stochastic Optimization",
+      "goodGrounding": 0.8,
+      "badGrounding": 0.38461538461538464,
+      "judges": {
+        "qwen3-14b": {
+          "good": {
+            "overall": 4.5,
+            "pass": false,
+            "faithfulness": 3,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.25,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 2
+          }
+        },
+        "gemma-4-e4b": {
+          "good": {
+            "overall": 5,
+            "pass": true,
+            "faithfulness": 5,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.5,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 2
+          }
+        }
+      }
+    },
+    {
+      "paperId": "995c5f5e62614fcb4d2796ad2faab969da51713e",
+      "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+      "goodGrounding": 0.75,
+      "badGrounding": 0.36,
+      "judges": {
+        "qwen3-14b": {
+          "good": {
+            "overall": 4.5,
+            "pass": false,
+            "faithfulness": 3,
+            "unsupported": 2
+          },
+          "bad": {
+            "overall": 2,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 2
+          }
+        },
+        "gemma-4-e4b": {
+          "good": {
+            "overall": 5,
+            "pass": true,
+            "faithfulness": 5,
+            "unsupported": 0
+          },
+          "bad": {
+            "overall": 1.5,
+            "pass": false,
+            "faithfulness": 1,
+            "unsupported": 3
           }
         }
       }
