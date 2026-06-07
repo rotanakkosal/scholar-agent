@@ -1,4 +1,5 @@
 import type { ChatOptions, LLMClient } from "../LLMClient";
+import { RetryableHttpError, isRetryableLLMError, retryableStatus, withRetry } from "../retry";
 
 /**
  * OpenAI-compatible adapter (POST /v1/chat/completions). Works with vLLM,
@@ -47,20 +48,27 @@ export class OpenAIAdapter implements LLMClient {
     }
     if (this.extraBody) Object.assign(body, this.extraBody);
 
-    const res = await fetch(this.url("/chat/completions"), {
-      method: "POST",
-      headers: this.headers(),
-      body: JSON.stringify(body),
-      signal: opts.signal ?? AbortSignal.timeout(this.timeoutMs),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`OpenAI /chat/completions ${res.status}: ${text.slice(0, 300)}`);
-    }
-    const data = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    return data.choices?.[0]?.message?.content ?? "";
+    return withRetry(
+      async () => {
+        const res = await fetch(this.url("/chat/completions"), {
+          method: "POST",
+          headers: this.headers(),
+          body: JSON.stringify(body),
+          signal: opts.signal ?? AbortSignal.timeout(this.timeoutMs),
+        });
+        if (retryableStatus(res.status)) throw new RetryableHttpError(res.status);
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`OpenAI /chat/completions ${res.status}: ${text.slice(0, 300)}`);
+        }
+        const data = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
+        return data.choices?.[0]?.message?.content ?? "";
+      },
+      isRetryableLLMError,
+      { retries: 4, baseDelayMs: 800, maxDelayMs: 8000 },
+    );
   }
 
   async listModels(): Promise<string[]> {

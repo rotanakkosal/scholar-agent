@@ -1,4 +1,5 @@
 import type { ChatOptions, LLMClient } from "../LLMClient";
+import { RetryableHttpError, isRetryableLLMError, retryableStatus, withRetry } from "../retry";
 
 /**
  * Ollama-native adapter (POST /api/chat). Uses the `format` field to pass a
@@ -42,18 +43,25 @@ export class OllamaAdapter implements LLMClient {
     };
     if (this.extraBody) Object.assign(body, this.extraBody);
 
-    const res = await fetch(`${this.base()}/api/chat`, {
-      method: "POST",
-      headers: this.headers(),
-      body: JSON.stringify(body),
-      signal: opts.signal ?? AbortSignal.timeout(this.timeoutMs),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Ollama /api/chat ${res.status}: ${text.slice(0, 300)}`);
-    }
-    const data = (await res.json()) as { message?: { content?: string } };
-    return data.message?.content ?? "";
+    return withRetry(
+      async () => {
+        const res = await fetch(`${this.base()}/api/chat`, {
+          method: "POST",
+          headers: this.headers(),
+          body: JSON.stringify(body),
+          signal: opts.signal ?? AbortSignal.timeout(this.timeoutMs),
+        });
+        if (retryableStatus(res.status)) throw new RetryableHttpError(res.status);
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`Ollama /api/chat ${res.status}: ${text.slice(0, 300)}`);
+        }
+        const data = (await res.json()) as { message?: { content?: string } };
+        return data.message?.content ?? "";
+      },
+      isRetryableLLMError,
+      { retries: 4, baseDelayMs: 800, maxDelayMs: 8000 },
+    );
   }
 
   async listModels(): Promise<string[]> {
