@@ -1,7 +1,5 @@
 # Scholar Agent
 
-> An agentic pipeline for literature review — final project for **AI System II** (Department of Big Data).
-
 Scholar Agent takes a research query and automatically:
 
 1. **Searches** academic papers via the Semantic Scholar API (LLM keyword expansion + citation snowballing),
@@ -10,36 +8,38 @@ Scholar Agent takes a research query and automatically:
 4. **Judges** each summary with an **LLM-as-Judge** against a rubric (Clarity, Key Finding, Faithfulness, Consistency), looping **Summary → Judge → Refine for up to _T_ rounds** until it passes,
 5. **Outputs** a verified results table.
 
-This mirrors the proposal — Figure 1 (Search Phase → Evaluation Phase → Final Phase) and Table 1 (Title, Abstract, Published Year, DOI, Methodology, Contribution).
+This mirrors the proposal: Figure 1 (Search Phase → Evaluation Phase → Final Phase) and Table 1 (Title, Abstract, Published Year, DOI, Methodology, Contribution).
 
 ## Architecture
 
-- **Next.js 16 (App Router) + TypeScript + Tailwind** — UI and API in one app.
-- **`src/lib/`** — the framework-agnostic pipeline (schemas, LLM client, Semantic Scholar client, agents). Unit-testable and reusable.
-- **Dual-model, provider-agnostic LLM client** supporting **Ollama** (`/api/chat`) and **OpenAI-compatible** (`/v1/...`) APIs. By default the **worker/summarizer (Qwen)** and the **judge (Gemma)** run on **separate endpoints** — two model families, which mitigates the single-model-bias limitation noted in the proposal.
-- **Semantic Scholar Graph API** for retrieval (rate-limited ~1 req/s + exponential-backoff retry).
-- **Zod** — one schema source powering runtime validation, the LLM's JSON-schema output, and TypeScript types.
-- **Faithfulness/grounding metric** — a deterministic, model-independent check reported alongside the judge scores.
+1. **Next.js 16 (App Router) + TypeScript + Tailwind**: UI and API in one app.
+2. **`src/lib/`**: the framework-agnostic pipeline (schemas, LLM client, Semantic Scholar client, agents). Unit-testable and reusable.
+3. **Dual-model, provider-agnostic LLM client** supporting **Ollama** (`/api/chat`) and **OpenAI-compatible** (`/v1/...`) APIs. By default the **worker/summarizer (Qwen)** and the **judge (Gemma)** run on **separate endpoints**, two model families, which mitigates the single-model-bias limitation noted in the proposal.
+4. **Semantic Scholar Graph API** for retrieval (rate-limited ~1 req/s + exponential-backoff retry).
+5. **Zod**: one schema source powering runtime validation, the LLM's JSON-schema output, and TypeScript types.
+6. **Faithfulness/grounding metric**: a deterministic, model-independent check reported alongside the judge scores.
 
 See [docs/research/agentic-litreview-survey.md](docs/research/agentic-litreview-survey.md) for the literature grounding this design, and [docs/eval/judge-ablation.md](docs/eval/judge-ablation.md) for the Qwen-vs-Gemma judge benchmark.
 
 ## Status
 
-- [x] **M0** — Foundations (app, schemas, LLM + Semantic Scholar clients, health check)
-- [x] **M1** — Core pipeline (search → rank → summarize → judge → refine _T_ rounds)
-- [x] **M2** — API routes + SSE live progress + file-based job store
-- [x] **M3** — Web UI (query form, live progress, results table, CSV/MD/JSON export)
-- [x] **M4** — Docker deploy (standalone image + compose)
-- [x] **M5** — Vitest unit tests + evaluation (faithfulness metric, judge ablation)
-- [ ] Future — embedding retrieval + re-ranker, larger evaluation set, pairwise-refine
+| Milestone | Status | Description |
+| --- | --- | --- |
+| M0 | Done | Foundations (app, schemas, LLM + Semantic Scholar clients, health check) |
+| M1 | Done | Core pipeline (search → rank → summarize → judge → refine _T_ rounds) |
+| M2 | Done | API routes + SSE live progress + file-based job store |
+| M3 | Done | Web UI (query form, live progress, results table, CSV/MD/JSON export) |
+| M4 | Done | Docker deploy (standalone image + compose) |
+| M5 | Done | Vitest unit tests + evaluation (faithfulness metric, judge ablation) |
+| Future | Planned | embedding retrieval + re-ranker, larger evaluation set, pairwise-refine |
 
 ## Getting started
 
 ### Prerequisites
 
-- **Node.js 24+**
-- One or two **LLM endpoints** (Ollama or OpenAI-compatible) for the worker and judge models.
-- Optional: a free **Semantic Scholar API key** (reliable search) — semanticscholar.org/product/api.
+1. **Node.js 24+**
+2. One or two **LLM endpoints** (Ollama or OpenAI-compatible) for the worker and judge models.
+3. Optional: a free **Semantic Scholar API key** (reliable search), semanticscholar.org/product/api.
 
 ### Setup
 
@@ -104,14 +104,3 @@ test/                  Vitest unit tests
 scripts/               health, benchmark, probes
 docs/                  proposal, research survey, evaluation results
 ```
-
-## Team
-
-Final project for **AI System II** — Department of Big Data.
-
-- Chhor Ratanaktepi
-- Chhun Rotanakkosal
-- Chiv Kimchhor
-- Vorn Naro
-
-Supervisor: Prof. Kotb Shimaa Abdelnabi Abdelhakeem

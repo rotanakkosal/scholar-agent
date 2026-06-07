@@ -33,7 +33,9 @@ export function reviseUser(paper: Paper, previous: SummaryDraft, verdict: JudgeV
     `${paperBlock(paper)}\n\n` +
     `Your previous summary:\n  methodology: ${previous.methodology}\n  contribution: ${previous.contribution}\n\n` +
     `A reviewer found issues:\n${verdict.feedback}${claims}\n\n` +
-    `Revise the summary to fix these issues, using ONLY the abstract. ` +
+    `Revise carefully: KEEP everything that is already correct and supported by the abstract, and change ` +
+    `ONLY what is needed to fix the issues above. Do not add any new claim that the abstract does not state ` +
+    `(write exactly "Not stated in abstract" if a field is unsupported). ` +
     `Return JSON: { "methodology": "...", "contribution": "..." }`
   );
 }

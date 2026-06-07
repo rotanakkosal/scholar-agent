@@ -3,13 +3,14 @@ import type { SummaryDraft } from "../../schemas/summary";
 
 export const JUDGE_SYSTEM =
   "You are a strict reviewer evaluating a SUMMARY of an academic paper against the paper's ABSTRACT. " +
-  "Score each rubric dimension from 1 (poor) to 5 (excellent):\n" +
-  "- clarity: is the summary clear, concise, and well written?\n" +
-  "- keyFinding: does it capture the paper's key finding / contribution?\n" +
-  "- faithfulness: is EVERY claim supported by the abstract? (no hallucination, no outside knowledge)\n" +
-  "- consistency: are the methodology and contribution mutually consistent and non-contradictory?\n\n" +
-  "List every claim in the summary NOT supported by the abstract in `unsupportedClaims`. " +
-  "Give brief, actionable `feedback`. Evaluate ONLY against the provided abstract. Respond with JSON only.";
+  "Evaluate ONLY against the provided abstract — do not use outside knowledge and do not hallucinate.\n\n" +
+  "First write a brief `assessment` (2-4 sentences: what the summary gets right and what is wrong). " +
+  "Then, for EACH dimension, give a one-sentence `reason` FIRST and THEN an integer `score` (1-5) using these anchors:\n" +
+  "- clarity (clear, concise, well written): 5 precise & unambiguous · 3 understandable but loose/wordy · 1 confusing or contradictory\n" +
+  "- keyFinding (captures the paper's main contribution): 5 captures it exactly · 3 partial or peripheral · 1 misses or misstates it\n" +
+  "- faithfulness (every claim supported by the abstract): 5 fully supported, no outside info · 3 mostly, but ≥1 vague/unverifiable claim · 1 clear hallucination or contradiction\n" +
+  "- consistency (methodology and contribution agree): 5 fully consistent · 3 minor tension · 1 contradictory\n\n" +
+  "List every claim NOT supported by the abstract in `unsupportedClaims`, and give brief actionable `feedback`. Respond with JSON only.";
 
 export function judgeUser(paper: Paper, draft: SummaryDraft): string {
   return (
@@ -17,8 +18,9 @@ export function judgeUser(paper: Paper, draft: SummaryDraft): string {
     `Abstract: ${paper.abstract ?? "(no abstract available)"}\n` +
     (paper.tldr ? `TLDR: ${paper.tldr}\n` : "") +
     `\nSUMMARY TO EVALUATE\nmethodology: ${draft.methodology}\ncontribution: ${draft.contribution}\n\n` +
-    `Return JSON: { "scores": { "clarity": {"score": N, "reason": "..."}, ` +
-    `"keyFinding": {"score": N, "reason": "..."}, "faithfulness": {"score": N, "reason": "..."}, ` +
-    `"consistency": {"score": N, "reason": "..."} }, "feedback": "...", "unsupportedClaims": ["..."] }`
+    `Return JSON: { "assessment": "...", "scores": { ` +
+    `"clarity": {"reason": "...", "score": N}, "keyFinding": {"reason": "...", "score": N}, ` +
+    `"faithfulness": {"reason": "...", "score": N}, "consistency": {"reason": "...", "score": N} }, ` +
+    `"feedback": "...", "unsupportedClaims": ["..."] }`
   );
 }

@@ -16,8 +16,9 @@ export function fakeClient(responder: (opts: ChatOptions, call: number) => strin
 
 /** Build a JudgeDraft JSON string with a uniform score across all dimensions. */
 export function judgeJson(score: number, unsupported: string[] = []): string {
-  const dim = (s: number) => ({ score: s, reason: "reason" });
+  const dim = (s: number) => ({ reason: "reason", score: s });
   return JSON.stringify({
+    assessment: "overall assessment",
     scores: {
       clarity: dim(score),
       keyFinding: dim(score),
