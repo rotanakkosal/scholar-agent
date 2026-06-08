@@ -180,6 +180,8 @@ export function ResultsTable({
   const [sort, setSort] = useState<SortKey>("score");
   const [view, setView] = useState<View>("cards");
   const [filter, setFilter] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const navRef = useRef<HTMLOListElement>(null);
 
   const newSet = useMemo(() => new Set(newPaperIds ?? []), [newPaperIds]);
   const hasNew = newSet.size > 0;
@@ -228,6 +230,44 @@ export function ResultsTable({
     });
   }, [allRows, onlyPassed, sort, newSet, filter]);
 
+  const rowIds = rows.map((r) => r.paperId).join("|");
+
+  // Scroll-spy: highlight the paper currently nearest the top of the viewport.
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>('[id^="paper-"]'));
+    if (els.length === 0) return;
+    const tops = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const id = e.target.id.slice("paper-".length);
+          if (e.isIntersecting) tops.set(id, e.boundingClientRect.top);
+          else tops.delete(id);
+        }
+        let best: string | null = null;
+        let bestTop = Infinity;
+        tops.forEach((top, id) => {
+          if (top < bestTop) {
+            bestTop = top;
+            best = id;
+          }
+        });
+        if (best) setActiveId(best);
+      },
+      { rootMargin: "-72px 0px -55% 0px", threshold: 0 },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [rowIds, view]);
+
+  // Keep the active item scrolled into view within the index panel.
+  useEffect(() => {
+    if (!activeId || !navRef.current) return;
+    navRef.current
+      .querySelector<HTMLElement>(`[data-id="${activeId}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [activeId]);
+
   if (allRows.length === 0) return null;
 
   const SORTS: { key: SortKey; label: string }[] = [
@@ -249,32 +289,47 @@ export function ResultsTable({
 
   return (
     <section className="lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:items-start lg:gap-6">
-      {/* Jump-to index (large screens) */}
+      {/* Jump-to index (large screens) — sticky panel with scroll-spy highlight */}
       <nav className="hidden lg:block">
-        <div className="sticky top-4 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-border bg-card p-3 shadow-sm">
-          <div className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        <div className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col rounded-3xl border border-border bg-card p-3 shadow-sm">
+          <div className="mb-2 px-2 pt-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Jump to ({rows.length})
           </div>
-          <ol className="flex flex-col gap-0.5">
-            {rows.map((r, i) => (
-              <li key={r.paperId}>
-                <button
-                  type="button"
-                  onClick={() => scrollToPaper(r.paperId)}
-                  className="flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-accent"
-                >
-                  <span className="tabular-nums text-muted-foreground">{i + 1}</span>
-                  <span className="line-clamp-2 text-foreground">{r.summary.title}</span>
-                  {r.verdict && (
+          <ol ref={navRef} className="flex flex-col gap-0.5 overflow-y-auto pr-1">
+            {rows.map((r, i) => {
+              const active = r.paperId === activeId;
+              return (
+                <li key={r.paperId}>
+                  <button
+                    type="button"
+                    data-id={r.paperId}
+                    onClick={() => scrollToPaper(r.paperId)}
+                    aria-current={active ? "true" : undefined}
+                    className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                      active
+                        ? "bg-coral-soft text-coral-strong"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    }`}
+                  >
                     <span
-                      className={`ml-auto mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${
-                        r.verdict.pass ? "bg-success" : "bg-destructive"
+                      className={`w-4 shrink-0 text-xs tabular-nums ${
+                        active ? "text-coral-strong" : "text-muted-foreground/60"
                       }`}
-                    />
-                  )}
-                </button>
-              </li>
-            ))}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="line-clamp-2 flex-1 leading-snug">{r.summary.title}</span>
+                    {r.verdict && (
+                      <span
+                        className={`mt-1 h-1.5 w-1.5 shrink-0 self-start rounded-full ${
+                          r.verdict.pass ? "bg-success" : "bg-destructive"
+                        }`}
+                      />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </nav>
