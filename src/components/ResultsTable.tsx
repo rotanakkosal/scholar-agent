@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ReviewState } from "@/hooks/useReview";
 import type { JudgeVerdict, ClaimFaithfulness } from "@/lib/schemas/judge";
 import type { PaperSummary } from "@/lib/schemas/summary";
+import { toCsv, toMarkdown } from "@/lib/export";
 
 type Row = {
   paperId: string;
@@ -335,6 +336,26 @@ export function ResultsTable({
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
   };
 
+  // Export is generated in the browser from the current (filtered) rows, so it
+  // works on any host — no server round-trip, no dependence on a persisted job.
+  const exportFile = (fmt: "csv" | "md" | "json") => {
+    const summaries = rows.map((r) => r.summary);
+    const out = {
+      csv: { content: toCsv(summaries), mime: "text/csv", ext: "csv" },
+      md: { content: toMarkdown(summaries), mime: "text/markdown", ext: "md" },
+      json: { content: JSON.stringify(summaries, null, 2), mime: "application/json", ext: "json" },
+    }[fmt];
+    const blob = new Blob([out.content], { type: `${out.mime};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `scholar-agent-review.${out.ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const pillBtn = (active: boolean) =>
     `rounded-full px-3 py-1 text-xs font-semibold transition ${
       active ? "bg-coral-soft text-coral-strong" : "text-muted-foreground hover:text-foreground"
@@ -490,17 +511,18 @@ export function ResultsTable({
               ))}
             </div>
 
-            {/* Export */}
-            {state.jobId && !state.running && (
+            {/* Export — generated client-side from the current rows */}
+            {!state.running && (
               <div className="flex items-center gap-1.5">
                 {(["csv", "md", "json"] as const).map((fmt) => (
-                  <a
+                  <button
                     key={fmt}
-                    href={`/api/reviews/${state.jobId}/export?format=${fmt}`}
+                    type="button"
+                    onClick={() => exportFile(fmt)}
                     className="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-foreground transition hover:border-coral hover:text-coral-strong"
                   >
                     {fmt.toUpperCase()}
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
