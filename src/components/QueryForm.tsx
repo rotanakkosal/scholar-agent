@@ -12,6 +12,16 @@ const EXAMPLES = [
   "Vision transformers vs CNNs",
 ];
 
+const CURRENT_YEAR = new Date().getFullYear();
+
+// Quick year-scope presets ("last N years" stays correct over time; null = open-ended).
+const YEAR_PRESETS: { label: string; from: number | null; to: number | null }[] = [
+  { label: "Any", from: null, to: null },
+  { label: "Last 3 yrs", from: CURRENT_YEAR - 2, to: null },
+  { label: "Last 5 yrs", from: CURRENT_YEAR - 4, to: null },
+  { label: "Last 10 yrs", from: CURRENT_YEAR - 9, to: null },
+];
+
 export function QueryForm({
   running,
   onStart,
@@ -20,6 +30,8 @@ export function QueryForm({
   initialTopK = 5,
   initialMaxRounds = 2,
   initialStrategies = ["keyword", "citation"],
+  initialYearFrom = null,
+  initialYearTo = null,
 }: {
   running: boolean;
   onStart: (params: ReviewParams) => void;
@@ -28,11 +40,15 @@ export function QueryForm({
   initialTopK?: number;
   initialMaxRounds?: number;
   initialStrategies?: string[];
+  initialYearFrom?: number | null;
+  initialYearTo?: number | null;
 }) {
   const [query, setQuery] = useState(initialQuery);
   const [topK, setTopK] = useState(initialTopK);
   const [maxRounds, setMaxRounds] = useState(initialMaxRounds);
   const [strategies, setStrategies] = useState<string[]>(initialStrategies);
+  const [yearFrom, setYearFrom] = useState<number | null>(initialYearFrom);
+  const [yearTo, setYearTo] = useState<number | null>(initialYearTo);
   const [advanced, setAdvanced] = useState(false);
 
   const toggle = (s: string) =>
@@ -46,6 +62,8 @@ export function QueryForm({
       topK,
       maxRounds,
       strategies: strategies.length ? strategies : ["keyword"],
+      yearFrom,
+      yearTo,
     });
   };
 
@@ -123,6 +141,37 @@ export function QueryForm({
         )}
       </div>
 
+      {/* Year scope — quick presets (always visible; custom range lives in Advanced) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Years</span>
+        {YEAR_PRESETS.map((p) => {
+          const active = yearFrom === p.from && yearTo === p.to;
+          return (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => {
+                setYearFrom(p.from);
+                setYearTo(p.to);
+              }}
+              aria-pressed={active}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                active
+                  ? "border-coral bg-coral-soft text-coral-strong"
+                  : "border-input text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+        {!YEAR_PRESETS.some((p) => yearFrom === p.from && yearTo === p.to) && (
+          <span className="rounded-full border border-coral bg-coral-soft px-3 py-1.5 text-xs font-semibold text-coral-strong">
+            {yearFrom ?? "any"}–{yearTo ?? "any"}
+          </span>
+        )}
+      </div>
+
       {/* Guided empty state: example chips + how-it-works */}
       {showEmptyHelp && (
         <div className="flex flex-col gap-4">
@@ -181,6 +230,7 @@ export function QueryForm({
             <span className="ml-1 truncate text-xs font-medium text-muted-foreground">
               · Top-K {topK} · {maxRounds} refine round{maxRounds === 1 ? "" : "s"} ·{" "}
               {strategies.length ? strategies.join(", ") : "keyword"}
+              {yearFrom || yearTo ? ` · ${yearFrom ?? "any"}–${yearTo ?? "any"}` : ""}
             </span>
           )}
         </button>
@@ -306,6 +356,39 @@ export function QueryForm({
               </div>
               <span className="max-w-60 text-xs font-medium text-muted-foreground">
                 Keyword expands your query, citation snowballs the citation graph.
+              </span>
+            </div>
+
+            {/* Publication years — range filter */}
+            <div className="flex flex-col items-start gap-2.5">
+              <span className="text-xs font-semibold text-foreground">Publication years</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1900}
+                  max={CURRENT_YEAR}
+                  value={yearFrom ?? ""}
+                  onChange={(e) => setYearFrom(e.target.value ? Number(e.target.value) : null)}
+                  placeholder="Any"
+                  aria-label="From year"
+                  className="w-20 rounded-full border border-input bg-card px-3 py-1.5 text-center text-sm font-semibold tabular-nums text-foreground outline-none transition placeholder:font-medium placeholder:text-muted-foreground focus:border-coral focus:ring-2 focus:ring-coral/15"
+                />
+                <span className="text-sm font-semibold text-muted-foreground">–</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1900}
+                  max={CURRENT_YEAR}
+                  value={yearTo ?? ""}
+                  onChange={(e) => setYearTo(e.target.value ? Number(e.target.value) : null)}
+                  placeholder="Any"
+                  aria-label="To year"
+                  className="w-20 rounded-full border border-input bg-card px-3 py-1.5 text-center text-sm font-semibold tabular-nums text-foreground outline-none transition placeholder:font-medium placeholder:text-muted-foreground focus:border-coral focus:ring-2 focus:ring-coral/15"
+                />
+              </div>
+              <span className="max-w-60 text-xs font-medium text-muted-foreground">
+                Limit results to this year range — leave blank for any.
               </span>
             </div>
           </div>
