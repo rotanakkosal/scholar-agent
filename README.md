@@ -1,106 +1,111 @@
 # Scholar Agent
 
-Scholar Agent takes a research query and automatically:
+**Scholar Agent** turns a research question into a verified, structured literature review. It searches academic papers, summarizes each into a structured record, and has a separate **LLM-as-Judge** check every summary against a rubric — refining until it passes — so the output stays grounded in the sources rather than hallucinated.
 
-1. **Searches** academic papers via the Semantic Scholar API (LLM keyword expansion + citation snowballing),
-2. **Ranks** and keeps the **Top-K** by a transparent proxy score,
-3. **Summarizes** each paper into a structured row (Methodology, Contribution, …),
-4. **Judges** each summary with an **LLM-as-Judge** against a rubric (Clarity, Key Finding, Faithfulness, Consistency), looping **Summary → Judge → Refine for up to _T_ rounds** until it passes,
-5. **Outputs** a verified results table.
+## Screenshots
 
-This mirrors the proposal: Figure 1 (Search Phase → Evaluation Phase → Final Phase) and Table 1 (Title, Abstract, Published Year, DOI, Methodology, Contribution).
+**Dashboard — every review is saved as a project**
 
-## Architecture
+<img src="image/screen/screen1.png" alt="Scholar Agent dashboard" width="820">
 
-1. **Next.js 16 (App Router) + TypeScript + Tailwind**: UI and API in one app.
-2. **`src/lib/`**: the framework-agnostic pipeline (schemas, LLM client, Semantic Scholar client, agents). Unit-testable and reusable.
-3. **Dual-model, provider-agnostic LLM client** supporting **Ollama** (`/api/chat`) and **OpenAI-compatible** (`/v1/...`) APIs. By default the **worker/summarizer (Qwen)** and the **judge (Gemma)** run on **separate endpoints**, two model families, which mitigates the single-model-bias limitation noted in the proposal.
-4. **Semantic Scholar Graph API** for retrieval (rate-limited ~1 req/s + exponential-backoff retry).
-5. **Zod**: one schema source powering runtime validation, the LLM's JSON-schema output, and TypeScript types.
-6. **Faithfulness/grounding metric**: a deterministic, model-independent check reported alongside the judge scores.
+**New review — ask a question, scope the years, tune the search**
 
-See [docs/research/agentic-litreview-survey.md](docs/research/agentic-litreview-survey.md) for the literature grounding this design, and [docs/eval/judge-ablation.md](docs/eval/judge-ablation.md) for the Qwen-vs-Gemma judge benchmark.
+<img src="image/screen/screen2.png" alt="New review form" width="820">
 
-## Status
+**Results — ranked, judge-verified papers with a filter, compact view, and a sticky jump-to index**
 
-| Milestone | Status | Description |
-| --- | --- | --- |
-| M0 | Done | Foundations (app, schemas, LLM + Semantic Scholar clients, health check) |
-| M1 | Done | Core pipeline (search → rank → summarize → judge → refine _T_ rounds) |
-| M2 | Done | API routes + SSE live progress + file-based job store |
-| M3 | Done | Web UI (query form, live progress, results table, CSV/MD/JSON export) |
-| M4 | Done | Docker deploy (standalone image + compose) |
-| M5 | Done | Vitest unit tests + evaluation (faithfulness metric, judge ablation) |
-| Future | Planned | embedding retrieval + re-ranker, larger evaluation set, pairwise-refine |
+<img src="image/screen/screen3.png" alt="Results table" width="820">
+
+**Per-paper detail — methodology & contribution, rubric scores, and claim-by-claim faithfulness**
+
+<img src="image/screen/screen4.png" alt="Paper detail" width="820">
+
+## Features
+
+- **Agentic search** — an LLM expands your query into variants and snowballs the citation graph (Semantic Scholar), with an optional **publication-year scope**.
+- **Transparent Top-K ranking** — candidates are deduplicated and ranked by an explainable proxy score (relevance, citations, recency, multi-strategy agreement).
+- **Structured extraction** — each paper is distilled into *Methodology* and *Contribution*, with schema-validated JSON output (no free-form parsing).
+- **LLM-as-Judge + refinement** — a second model grades every summary on **Clarity, Key Finding, Faithfulness, Consistency** (anchored 1–5 rubric) and loops **Summarize → Judge → Refine** until it passes. Pass/fail is computed in code, never left to the model.
+- **Dual-model by design** — summarizer and judge are independent model families on separate endpoints, reducing single-model bias.
+- **Claim-level faithfulness** — each summary is decomposed into claims and verified against the abstract (RAGAS/FActScore-style), plus a deterministic word-overlap grounding score.
+- **Cross-paper disagreements** — surfaces where retrieved papers reach opposing conclusions, quoting the exact evidence.
+- **Grow a review** — "Find more papers" adds new, non-overlapping results to an existing project; new papers are badged.
+- **Built for long lists** — filter, a Cards/Compact toggle, and a sticky jump-to index.
+- **Live + portable** — streamed progress (SSE), CSV / Markdown / JSON export, and reviews saved as projects.
+- **Provider-agnostic** — works with **Ollama** (`/api/chat`) or any **OpenAI-compatible** (`/v1/...`) endpoint.
+
+## How it works
+
+```
+query
+  ▼  Search Agent     query expansion + citation snowballing (Semantic Scholar)
+  ▼  Rank → Top-K     dedupe + transparent proxy ranking
+  ▼  Summary Agent    structured Methodology / Contribution — abstract-grounded
+  ▼  Judge ⇄ Refine   rubric scoring + faithfulness gate, up to T rounds
+  ▼  Disagreements    candidate cross-paper contradictions (quoted)
+  ▼  Results          verified rows + rubric + faithfulness, exportable
+```
+
+## Tech stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Zod v4 (one schema source for runtime validation, the LLM's JSON-schema output, and types) · Semantic Scholar Graph API.
+
+UI and API live in one Next.js app; the pipeline in `src/lib/` is framework-agnostic and unit-tested.
 
 ## Getting started
 
-### Prerequisites
-
-1. **Node.js 24+**
-2. One or two **LLM endpoints** (Ollama or OpenAI-compatible) for the worker and judge models.
-3. Optional: a free **Semantic Scholar API key** (reliable search), semanticscholar.org/product/api.
-
-### Setup
+**Prerequisites:** Node.js 24+, one or two LLM endpoints (Ollama or OpenAI-compatible), and optionally a free [Semantic Scholar API key](https://www.semanticscholar.org/product/api) for higher rate limits.
 
 ```bash
 npm install
-cp .env.example .env      # then fill in your endpoints, model names, and S2 key
-npm run health            # verify worker LLM, judge LLM, and Semantic Scholar
-npm run dev               # start the app at http://localhost:3000
+cp .env.example .env      # fill in your endpoints, model names, and (optional) S2 key
+npm run health            # verify summarizer LLM, judge LLM, and Semantic Scholar
+npm run dev               # http://localhost:3000
 ```
 
 ### Configuration (`.env`)
 
 | Variable | Meaning |
 | --- | --- |
-| `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_API_KEY` | worker (summarizer) endpoint |
-| `SUMMARY_MODEL` | worker model name (e.g. `qwen3-14b`) |
-| `LLM_DISABLE_THINKING` | `true` for Qwen3 (suppresses `<think>` traces) |
-| `JUDGE_LLM_PROVIDER`, `JUDGE_LLM_BASE_URL`, `JUDGE_LLM_API_KEY` | judge endpoint (falls back to worker if unset) |
-| `JUDGE_MODEL` | judge model name (e.g. `gemma-4-e4b`) |
-| `S2_API_KEY` | Semantic Scholar key (raises rate limits) |
-| `TOP_K`, `MAX_ROUNDS` | Top-K papers; max refine rounds (_T_) |
+| `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_API_KEY` | Summarizer endpoint (`ollama` or `openai`) |
+| `SUMMARY_MODEL` | Summarizer model name |
+| `LLM_DISABLE_THINKING` | `true` to suppress reasoning traces (e.g. Qwen3 `<think>`) |
+| `JUDGE_LLM_PROVIDER`, `JUDGE_LLM_BASE_URL`, `JUDGE_LLM_API_KEY` | Judge endpoint (falls back to the summarizer endpoint if unset) |
+| `JUDGE_MODEL` | Judge model name |
+| `S2_API_KEY` | Semantic Scholar API key (optional) |
+| `TOP_K`, `MAX_ROUNDS` | Papers to keep; max refine rounds (*T*) |
 
 ## Run with Docker
 
-The LLM servers and Semantic Scholar are remote, so the container only needs internet + `.env`:
+The LLM endpoints and Semantic Scholar are reached over the network, so the container only needs internet access and your `.env`:
 
 ```bash
 docker compose up --build       # builds the standalone image, serves on :3000
 ```
 
-Results are persisted to `./data` (mounted volume).
-
 ## Scripts
 
 | Command | Description |
 | --- | --- |
-| `npm run dev` | start the dev server |
-| `npm run health` | check worker LLM + judge LLM + Semantic Scholar |
-| `npm run benchmark` | judge-ablation benchmark (Qwen vs Gemma) → `docs/eval/` |
-| `npm test` | run the Vitest unit suite |
-| `npm run typecheck` | TypeScript check |
-| `npm run lint` | ESLint |
-| `npm run build` | production build |
-
-There are also developer probes: `scripts/probe-llm.ts` (structured-output smoke test) and `scripts/probe-pipeline.ts` (Summary→Judge→Refine on a sample paper).
+| `npm run dev` · `build` · `start` | Dev server · production build · serve |
+| `npm run health` | Check summarizer LLM + judge LLM + Semantic Scholar |
+| `npm run benchmark` | Judge discrimination benchmark → `docs/eval/` |
+| `npm test` · `typecheck` · `lint` | Unit tests · TypeScript · ESLint |
 
 ## Project structure
 
 ```
 src/
-  app/                 Next.js routes (UI + /api: reviews, health, export)
-  components/          QueryForm, ProgressView, ResultsTable
-  hooks/               useReview (SSE consumer)
+  app/            Next.js routes (UI + /api: reviews, health, export)
+  components/     QueryForm, ProgressView, ResultsTable, …
+  hooks/          useReview (SSE consumer)
   lib/
-    schemas/           Zod contracts (Paper, PaperSummary, JudgeVerdict, …)
-    llm/               provider-agnostic client, structured output, prompts
-    clients/           Semantic Scholar client (rate-limit + retry)
-    pipeline/          searchAgent, rank, summaryAgent, judge, refineLoop, runReview
-    eval/              faithfulness metric, judge-ablation benchmark, fixtures
-    store/             file-based job store
-test/                  Vitest unit tests
-scripts/               health, benchmark, probes
-docs/                  proposal, research survey, evaluation results
+    schemas/      Zod contracts (Paper, PaperSummary, JudgeVerdict, Disagreement, …)
+    llm/          provider-agnostic client, structured output, prompts
+    clients/      Semantic Scholar client (rate-limit + retry)
+    pipeline/     searchAgent, rank, summaryAgent, judge, refineLoop,
+                  claimFaithfulness, disagreements, runReview
+    eval/         faithfulness metric, discrimination benchmark, fixtures
+test/             Vitest unit tests
+scripts/          health, benchmark, probes
 ```
