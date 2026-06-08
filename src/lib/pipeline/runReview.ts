@@ -53,6 +53,7 @@ export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}):
     query: params.query,
     strategies: params.strategies,
     topKHint: params.topK,
+    excludePaperIds: params.excludePaperIds,
     yearFrom: params.yearFrom,
     model: summaryModel,
     llm,

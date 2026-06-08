@@ -11,6 +11,8 @@ export interface ReviewParams {
   topK: number;
   maxRounds: number;
   strategies: string[];
+  /** Paper IDs to skip (already collected) — used by "find more papers". */
+  excludePaperIds?: string[];
   refresh?: boolean;
 }
 

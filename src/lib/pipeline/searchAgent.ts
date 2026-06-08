@@ -16,6 +16,9 @@ export interface SearchAgentOptions {
   strategies: PaperSource[];
   /** Used to size per-query result limits before ranking down to Top-K. */
   topKHint: number;
+  /** Paper IDs already collected (e.g. an existing project) — excluded from the
+   *  result so "find more" surfaces genuinely new papers. */
+  excludePaperIds?: string[];
   yearFrom?: number | null;
   /** Model used for query expansion (defaults to the summary model). */
   model?: string;
@@ -34,6 +37,9 @@ export interface SearchAgentOptions {
 export async function searchAgent(opts: SearchAgentOptions): Promise<Paper[]> {
   const model = opts.model ?? config.llm.summaryModel;
   const year = opts.yearFrom ? `${opts.yearFrom}-` : undefined;
+  const exclude = new Set(opts.excludePaperIds ?? []);
+  // Fetch enough to still yield topKHint *new* papers after dropping excluded ones.
+  const sizeHint = opts.topKHint + exclude.size;
   const collected: Paper[] = [];
 
   // --- Keyword strategy: expand the query into variants, then search each. ---
@@ -58,7 +64,8 @@ export async function searchAgent(opts: SearchAgentOptions): Promise<Paper[]> {
     }
     opts.emit?.({ type: "search_strategy", strategy: "keyword", queries });
 
-    const perQuery = Math.max(5, Math.ceil((opts.topKHint * 3) / queries.length));
+    // Fetch ~3× Top-K candidates to rank down from, capped at S2's 100/request limit.
+    const perQuery = Math.min(100, Math.max(5, Math.ceil((sizeHint * 3) / queries.length)));
     for (const q of queries) {
       try {
         const papers = await opts.s2.search(q, {
@@ -96,7 +103,7 @@ export async function searchAgent(opts: SearchAgentOptions): Promise<Paper[]> {
     });
   }
 
-  return dedupePapers(collected);
+  return dedupePapers(collected).filter((p) => !exclude.has(p.paperId));
 }
 
 function dedupeStrings(values: string[]): string[] {
