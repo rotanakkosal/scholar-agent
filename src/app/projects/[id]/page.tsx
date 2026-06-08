@@ -15,6 +15,7 @@ import {
   projectToState,
   liveProjectState,
   mergeReviewIntoProject,
+  latestBatchIds,
   saveProject,
   type Project,
 } from "@/lib/projects";
@@ -56,7 +57,7 @@ export default function ProjectPage() {
   useEffect(() => {
     if (!user || !id) return;
     const found = getProject(id);
-    if (found && found.userId === user.email) {
+    if (found && found.userId === user.username) {
       setProject(found);
       setStatus("ok");
     } else {
@@ -97,6 +98,14 @@ export default function ProjectPage() {
     if (!project) return null;
     return finding ? liveProjectState(project, live) : projectToState(project);
   }, [project, live, finding]);
+
+  // Newest batch (persisted) + any papers streaming in from an active "find more".
+  const newPaperIds = useMemo(() => {
+    if (!project) return [];
+    const base = new Set(project.paperOrder);
+    const liveNew = live.paperOrder.filter((pid) => !base.has(pid));
+    return [...new Set([...latestBatchIds(project), ...liveNew])];
+  }, [project, live.paperOrder]);
 
   if (!ready || !user) return <LoadingShell />;
 
@@ -248,7 +257,7 @@ export default function ProjectPage() {
       {finding && <ProgressView state={live} />}
 
       <StatsStrip state={displayState} />
-      <ResultsTable state={displayState} />
+      <ResultsTable state={displayState} newPaperIds={newPaperIds} />
       <Disagreements state={displayState} />
     </AppShell>
   );

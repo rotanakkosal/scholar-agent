@@ -16,15 +16,23 @@ export function QueryForm({
   running,
   onStart,
   onCancel,
+  initialQuery = "",
+  initialTopK = 5,
+  initialMaxRounds = 2,
+  initialStrategies = ["keyword", "citation"],
 }: {
   running: boolean;
   onStart: (params: ReviewParams) => void;
   onCancel: () => void;
+  initialQuery?: string;
+  initialTopK?: number;
+  initialMaxRounds?: number;
+  initialStrategies?: string[];
 }) {
-  const [query, setQuery] = useState("");
-  const [topK, setTopK] = useState(5);
-  const [maxRounds, setMaxRounds] = useState(2);
-  const [strategies, setStrategies] = useState<string[]>(["keyword", "citation"]);
+  const [query, setQuery] = useState(initialQuery);
+  const [topK, setTopK] = useState(initialTopK);
+  const [maxRounds, setMaxRounds] = useState(initialMaxRounds);
+  const [strategies, setStrategies] = useState<string[]>(initialStrategies);
   const [advanced, setAdvanced] = useState(false);
 
   const toggle = (s: string) =>
