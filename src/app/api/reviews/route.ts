@@ -4,6 +4,8 @@ import { createJob, saveJob, listJobs, findCompletedByParams } from "@/lib/store
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Reviews stream for 20–40s+; raise the serverless timeout (Hobby max 60s, Pro up to 300).
+export const maxDuration = 60;
 
 /**
  * POST /api/reviews — start a literature review.
