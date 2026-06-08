@@ -13,6 +13,9 @@ export interface ReviewParams {
   strategies: string[];
   /** Paper IDs to skip (already collected) — used by "find more papers". */
   excludePaperIds?: string[];
+  /** Publication-year range filter (inclusive); null = unbounded. */
+  yearFrom?: number | null;
+  yearTo?: number | null;
   refresh?: boolean;
 }
 

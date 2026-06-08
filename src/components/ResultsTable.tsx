@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ReviewState } from "@/hooks/useReview";
 import type { JudgeVerdict, ClaimFaithfulness } from "@/lib/schemas/judge";
 import type { PaperSummary } from "@/lib/schemas/summary";
@@ -24,13 +24,32 @@ const TONE = {
   neutral: "bg-secondary text-secondary-foreground",
 } as const;
 
+/** Hover tooltip that explains a badge to first-time users. */
+function Tooltip({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <span className="group/tip relative inline-flex cursor-help">
+      {children}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-max max-w-[240px] -translate-x-1/2 rounded-lg bg-primary px-3 py-2 text-xs font-medium leading-snug text-primary-foreground opacity-0 shadow-md transition-opacity duration-150 group-hover/tip:opacity-100"
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
+
 function VerdictBadge({ verdict }: { verdict?: JudgeVerdict }) {
   if (!verdict) return null;
   return (
-    <span title={verdict.feedback} className={`${BADGE} ${verdict.pass ? TONE.success : TONE.danger}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {verdict.pass ? "Pass" : "Fail"} {verdict.overall.toFixed(1)}/5
-    </span>
+    <Tooltip
+      label={`LLM-as-Judge verdict — ${verdict.pass ? "passed" : "failed"} the quality rubric with ${verdict.overall.toFixed(1)}/5 overall (clarity, key finding, faithfulness, consistency).`}
+    >
+      <span className={`${BADGE} ${verdict.pass ? TONE.success : TONE.danger}`}>
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        {verdict.pass ? "Pass" : "Fail"} {verdict.overall.toFixed(1)}/5
+      </span>
+    </Tooltip>
   );
 }
 
@@ -38,24 +57,29 @@ function FaithBadge({ cf }: { cf?: ClaimFaithfulness | null }) {
   if (!cf || cf.total === 0) return null;
   const allSupported = cf.supported === cf.total;
   return (
-    <span
-      title="Claim-level faithfulness: summary claims supported by the abstract"
-      className={`${BADGE} ${allSupported ? TONE.violet : TONE.danger}`}
+    <Tooltip
+      label={`Claim check — ${cf.supported} of ${cf.total} claims in the summary are directly supported by the paper's abstract.`}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      Facts {cf.supported}/{cf.total}
-    </span>
+      <span className={`${BADGE} ${allSupported ? TONE.violet : TONE.danger}`}>
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        Facts {cf.supported}/{cf.total}
+      </span>
+    </Tooltip>
   );
 }
 
 function Grounding({ pct }: { pct: number }) {
   return (
-    <span className={`${BADGE} ${TONE.pink}`} title="Abstract grounding">
-      <span className="h-1.5 w-12 overflow-hidden rounded-full bg-white/30">
-        <span className="block h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
+    <Tooltip
+      label={`Grounding — ${pct}% of the summary's wording overlaps the source abstract (a model-independent faithfulness signal).`}
+    >
+      <span className={`${BADGE} ${TONE.pink}`}>
+        <span className="h-1.5 w-12 overflow-hidden rounded-full bg-white/30">
+          <span className="block h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
+        </span>
+        <span className="tabular-nums">{pct}%</span>
       </span>
-      <span className="tabular-nums">{pct}%</span>
-    </span>
+    </Tooltip>
   );
 }
 
@@ -182,6 +206,7 @@ export function ResultsTable({
   const [filter, setFilter] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const navRef = useRef<HTMLOListElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   const newSet = useMemo(() => new Set(newPaperIds ?? []), [newPaperIds]);
   const hasNew = newSet.size > 0;
@@ -257,15 +282,38 @@ export function ResultsTable({
       { rootMargin: "-72px 0px -55% 0px", threshold: 0 },
     );
     els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+
+    // The last papers can't reach the detection band at the bottom of the page,
+    // so force the active item to the last one once the page is scrolled to bottom.
+    const onScroll = () => {
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 80;
+      if (!atBottom) return;
+      const lastEl = els[els.length - 1];
+      if (lastEl) setActiveId(lastEl.id.slice("paper-".length));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [rowIds, view]);
 
-  // Keep the active item scrolled into view within the index panel.
+  // Keep the active item visible *within the index panel only* — scroll the
+  // panel's own scrollTop, never scrollIntoView (which would scroll the page
+  // too and fight the user's scrolling).
   useEffect(() => {
     if (!activeId || !navRef.current) return;
-    navRef.current
-      .querySelector<HTMLElement>(`[data-id="${activeId}"]`)
-      ?.scrollIntoView({ block: "nearest" });
+    const ol = navRef.current;
+    const el = ol.querySelector<HTMLElement>(`[data-id="${activeId}"]`);
+    if (!el) return;
+    const olRect = ol.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    if (elRect.top < olRect.top) {
+      ol.scrollTop -= olRect.top - elRect.top + 8;
+    } else if (elRect.bottom > olRect.bottom) {
+      ol.scrollTop += elRect.bottom - olRect.bottom + 8;
+    }
   }, [activeId]);
 
   if (allRows.length === 0) return null;
@@ -278,8 +326,13 @@ export function ResultsTable({
   ];
 
   const scrollToPaper = (id: string) => {
-    document.getElementById(`paper-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setOpen(id);
+    const el = document.getElementById(`paper-${id}`);
+    if (!el) return;
+    // Offset by the sticky toolbar (its height + the top-4 gap) so the card
+    // lands just below it instead of being hidden behind it.
+    const offset = (toolbarRef.current?.offsetHeight ?? 0) + 28;
+    const y = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
   };
 
   const pillBtn = (active: boolean) =>
@@ -288,14 +341,22 @@ export function ResultsTable({
     }`;
 
   return (
-    <section className="lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:items-start lg:gap-6">
+    <section className="lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-6">
       {/* Jump-to index (large screens) — sticky panel with scroll-spy highlight */}
       <nav className="hidden lg:block">
         <div className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col rounded-3xl border border-border bg-card p-3 shadow-sm">
-          <div className="mb-2 px-2 pt-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            Jump to ({rows.length})
+          <div className="mb-2 flex items-center justify-between px-2 pt-1">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Jump to
+            </span>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold tabular-nums text-muted-foreground">
+              {rows.length}
+            </span>
           </div>
-          <ol ref={navRef} className="flex flex-col gap-0.5 overflow-y-auto pr-1">
+          <ol
+            ref={navRef}
+            className="scrollbar-slim flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain pr-1"
+          >
             {rows.map((r, i) => {
               const active = r.paperId === activeId;
               return (
@@ -305,23 +366,29 @@ export function ResultsTable({
                     data-id={r.paperId}
                     onClick={() => scrollToPaper(r.paperId)}
                     aria-current={active ? "true" : undefined}
-                    className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
-                      active
-                        ? "bg-coral-soft text-coral-strong"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    className={`group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition ${
+                      active ? "bg-coral-soft" : "hover:bg-accent"
                     }`}
                   >
                     <span
-                      className={`w-4 shrink-0 text-xs tabular-nums ${
-                        active ? "text-coral-strong" : "text-muted-foreground/60"
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold tabular-nums transition ${
+                        active
+                          ? "bg-coral text-white"
+                          : "bg-secondary text-muted-foreground group-hover:text-foreground"
                       }`}
                     >
                       {i + 1}
                     </span>
-                    <span className="line-clamp-2 flex-1 leading-snug">{r.summary.title}</span>
+                    <span
+                      className={`line-clamp-2 flex-1 text-sm font-semibold leading-snug transition ${
+                        active ? "text-coral-strong" : "text-muted-foreground group-hover:text-foreground"
+                      }`}
+                    >
+                      {r.summary.title}
+                    </span>
                     {r.verdict && (
                       <span
-                        className={`mt-1 h-1.5 w-1.5 shrink-0 self-start rounded-full ${
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                           r.verdict.pass ? "bg-success" : "bg-destructive"
                         }`}
                       />
@@ -336,7 +403,10 @@ export function ResultsTable({
 
       <div className="flex min-w-0 flex-col gap-4">
         {/* Sticky toolbar */}
-        <div className="sticky top-4 z-10 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-sm backdrop-blur">
+        <div
+          ref={toolbarRef}
+          className="sticky top-4 z-10 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-sm backdrop-blur"
+        >
           <h2 className="text-xl font-extrabold tracking-tight text-foreground">
             Results <span className="text-muted-foreground">({allRows.length})</span>
           </h2>

@@ -20,6 +20,7 @@ export interface SearchAgentOptions {
    *  result so "find more" surfaces genuinely new papers. */
   excludePaperIds?: string[];
   yearFrom?: number | null;
+  yearTo?: number | null;
   /** Model used for query expansion (defaults to the summary model). */
   model?: string;
   llm: LLMClient;
@@ -36,7 +37,10 @@ export interface SearchAgentOptions {
  */
 export async function searchAgent(opts: SearchAgentOptions): Promise<Paper[]> {
   const model = opts.model ?? config.llm.summaryModel;
-  const year = opts.yearFrom ? `${opts.yearFrom}-` : undefined;
+  // Semantic Scholar `year` filter accepts "from-to", "from-", or "-to".
+  const from = opts.yearFrom ?? undefined;
+  const to = opts.yearTo ?? undefined;
+  const year = from && to ? `${from}-${to}` : from ? `${from}-` : to ? `-${to}` : undefined;
   const exclude = new Set(opts.excludePaperIds ?? []);
   // Fetch enough to still yield topKHint *new* papers after dropping excluded ones.
   const sizeHint = opts.topKHint + exclude.size;

@@ -40,7 +40,10 @@ export async function POST(req: Request) {
       };
 
       try {
-        const cached = refresh ? null : await findCompletedByParams(params);
+        // Re-runs are fresh by default (opt in with `cache: true`) so the live UI
+        // always renders fully and the latest pipeline/code changes take effect.
+        const useCache = body?.cache === true && !refresh;
+        const cached = useCache ? await findCompletedByParams(params) : null;
         if (cached?.result) {
           send({ type: "log", level: "info", message: "Served from cache (identical query already run)." });
           send({ type: "done", result: cached.result });

@@ -25,6 +25,7 @@ export const JobParamsSchema = z.object({
   summaryModel: z.string().optional(),
   judgeModel: z.string().optional(),
   yearFrom: z.number().int().nullable().default(null),
+  yearTo: z.number().int().nullable().default(null),
 });
 export type JobParams = z.infer<typeof JobParamsSchema>;
 

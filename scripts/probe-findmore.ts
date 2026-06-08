@@ -8,7 +8,13 @@ async function main(): Promise<void> {
   const query = "retrieval augmented generation";
   const llm = createLLMClient();
   const s2 = new SemanticScholarClient();
-  const common = { query, strategies: ["keyword", "citation"] as const, model: config.llm.summaryModel, llm, s2 };
+  const common = {
+    query,
+    strategies: ["keyword", "citation"] as ("keyword" | "citation")[],
+    model: config.llm.summaryModel,
+    llm,
+    s2,
+  };
 
   const first = rankTopK(await searchAgent({ ...common, topKHint: 5 }), 5);
   const firstIds = first.map((p) => p.paperId);

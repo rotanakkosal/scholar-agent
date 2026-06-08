@@ -55,6 +55,7 @@ export async function runReview(rawParams: JobParams, deps: RunReviewDeps = {}):
     topKHint: params.topK,
     excludePaperIds: params.excludePaperIds,
     yearFrom: params.yearFrom,
+    yearTo: params.yearTo,
     model: summaryModel,
     llm,
     s2,

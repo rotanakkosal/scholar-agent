@@ -23,7 +23,7 @@ export function ScrollToTop({ threshold = 500 }: { threshold?: number }) {
       onClick={toTop}
       aria-label="Scroll to top"
       tabIndex={visible ? 0 : -1}
-      className={`fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-coral motion-reduce:transition-none ${
+      className={`fixed bottom-6 right-[max(1.5rem,calc(50%_-_36rem_-_4rem))] z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-coral motion-reduce:transition-none ${
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
       }`}
     >

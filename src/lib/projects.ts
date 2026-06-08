@@ -9,7 +9,13 @@ export interface Project {
   id: string;
   userId: string;
   query: string;
-  params: { topK: number; maxRounds: number; strategies: string[] };
+  params: {
+    topK: number;
+    maxRounds: number;
+    strategies: string[];
+    yearFrom?: number | null;
+    yearTo?: number | null;
+  };
   createdAt: number;
   jobId?: string;
   // Snapshot of the review so it can be re-rendered read-only.
@@ -19,6 +25,8 @@ export interface Project {
   disagreements: Disagreement[];
   foundCount?: number;
   keptCount?: number;
+  /** Which batch each paper joined in: 1 = original review, 2+ = "find more" rounds. */
+  batches?: Record<string, number>;
 }
 
 const STORAGE_KEY = "scholar.projects";
@@ -65,7 +73,13 @@ export function projectFromState(
     id: crypto.randomUUID(),
     userId,
     query: params.query,
-    params: { topK: params.topK, maxRounds: params.maxRounds, strategies: params.strategies },
+    params: {
+      topK: params.topK,
+      maxRounds: params.maxRounds,
+      strategies: params.strategies,
+      yearFrom: params.yearFrom ?? null,
+      yearTo: params.yearTo ?? null,
+    },
     createdAt: Date.now(),
     jobId: state.jobId,
     paperOrder: state.paperOrder,
@@ -74,6 +88,7 @@ export function projectFromState(
     disagreements: state.disagreements,
     foundCount: state.foundCount,
     keptCount: state.keptCount,
+    batches: Object.fromEntries(state.paperOrder.map((id) => [id, 1])),
   };
 }
 
@@ -99,6 +114,13 @@ export function mergeReviewIntoProject(project: Project, state: ReviewState): Pr
   const disKey = (d: Disagreement) =>
     `${d.topic}|${d.sides.map((s) => s.paperId).sort().join(",")}`;
   const seen = new Set(project.disagreements.map(disKey));
+
+  // Stamp the new papers with the next batch number (original papers default to 1).
+  const prevBatches = project.batches ?? Object.fromEntries(project.paperOrder.map((id) => [id, 1]));
+  const nextBatch = Math.max(1, ...Object.values(prevBatches)) + 1;
+  const batches = { ...prevBatches };
+  for (const id of newIds) batches[id] = nextBatch;
+
   return {
     ...project,
     paperOrder: [...project.paperOrder, ...newIds],
@@ -110,7 +132,18 @@ export function mergeReviewIntoProject(project: Project, state: ReviewState): Pr
     ],
     foundCount: (project.foundCount ?? 0) + (state.foundCount ?? 0),
     keptCount: (project.keptCount ?? project.paperOrder.length) + newIds.length,
+    batches,
   };
+}
+
+/** Paper IDs from the most-recent "find more" batch (empty if only the original batch exists). */
+export function latestBatchIds(project: Project): string[] {
+  const batches = project.batches;
+  if (!batches) return [];
+  const values = Object.values(batches);
+  const max = values.length ? Math.max(...values) : 1;
+  if (max <= 1) return [];
+  return Object.keys(batches).filter((id) => batches[id] === max);
 }
 
 /** A ReviewState overlaying an in-progress "find more" run on top of a project. */

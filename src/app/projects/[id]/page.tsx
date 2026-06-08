@@ -10,6 +10,7 @@ import { ProgressView } from "@/components/ProgressView";
 import { ResultsTable } from "@/components/ResultsTable";
 import { StatsStrip } from "@/components/StatsStrip";
 import { Disagreements } from "@/components/Disagreements";
+import { FindMoreModal, type FindMoreSettings } from "@/components/FindMoreModal";
 import {
   getProject,
   projectToState,
@@ -81,14 +82,18 @@ export default function ProjectPage() {
     }
   }, [live.running, project, live.paperOrder]);
 
-  const findMore = () => {
+  const [findMoreOpen, setFindMoreOpen] = useState(false);
+  const runFindMore = (s: FindMoreSettings) => {
     if (!project) return;
+    setFindMoreOpen(false);
     setNotice(null);
     start({
       query: project.query,
-      topK: project.params.topK,
-      maxRounds: project.params.maxRounds,
-      strategies: project.params.strategies,
+      topK: s.topK,
+      maxRounds: s.maxRounds,
+      strategies: s.strategies,
+      yearFrom: s.yearFrom,
+      yearTo: s.yearTo,
       excludePaperIds: project.paperOrder,
     });
   };
@@ -106,6 +111,15 @@ export default function ProjectPage() {
     const liveNew = live.paperOrder.filter((pid) => !base.has(pid));
     return [...new Set([...latestBatchIds(project), ...liveNew])];
   }, [project, live.paperOrder]);
+
+  // Show the floating "Projects" button only after the top back link scrolls away.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 280);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   if (!ready || !user) return <LoadingShell />;
 
@@ -145,10 +159,14 @@ export default function ProjectPage() {
     hour: "numeric",
     minute: "2-digit",
   });
+  const yearQs =
+    (project.params.yearFrom ? `&yearFrom=${project.params.yearFrom}` : "") +
+    (project.params.yearTo ? `&yearTo=${project.params.yearTo}` : "");
   const baseHref =
     `/new?q=${encodeURIComponent(project.query)}` +
     `&topK=${project.params.topK}&rounds=${project.params.maxRounds}` +
-    `&strategies=${encodeURIComponent(project.params.strategies.join(","))}`;
+    `&strategies=${encodeURIComponent(project.params.strategies.join(","))}` +
+    yearQs;
   const rerunHref = `${baseHref}&run=1`;
 
   return (
@@ -220,7 +238,7 @@ export default function ProjectPage() {
           ) : (
             <button
               type="button"
-              onClick={findMore}
+              onClick={() => setFindMoreOpen(true)}
               title="Search for more papers and add them to this project"
               className="inline-flex w-fit items-center gap-1.5 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-coral-foreground shadow-sm transition hover:bg-coral-strong"
             >
@@ -259,6 +277,44 @@ export default function ProjectPage() {
       <StatsStrip state={displayState} />
       <ResultsTable state={displayState} newPaperIds={newPaperIds} />
       <Disagreements state={displayState} />
+
+      {/* Always-reachable way back to the dashboard from deep in the list. */}
+      <Link
+        href="/"
+        aria-label="Back to all projects"
+        tabIndex={scrolled ? 0 : -1}
+        aria-hidden={!scrolled}
+        className={`fixed bottom-6 left-[max(1.5rem,calc(50%_-_36rem_-_8rem))] z-50 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition-all duration-300 ease-out hover:bg-coral motion-reduce:transition-none ${
+          scrolled ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
+        }`}
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Projects
+      </Link>
+
+      <FindMoreModal
+        open={findMoreOpen}
+        onClose={() => setFindMoreOpen(false)}
+        onSubmit={runFindMore}
+        defaults={{
+          topK: project.params.topK,
+          maxRounds: project.params.maxRounds,
+          strategies: project.params.strategies,
+          yearFrom: project.params.yearFrom ?? null,
+          yearTo: project.params.yearTo ?? null,
+        }}
+      />
     </AppShell>
   );
 }

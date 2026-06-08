@@ -149,6 +149,26 @@ input[type="range"] {
   accent-color: var(--coral);
 }
 
+/* Slim, subtle scrollbar for inner scroll areas (e.g. the jump-to index). */
+.scrollbar-slim {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.scrollbar-slim::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+.scrollbar-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* Disciplined motion: a gentle entrance for cards/results. */
 @keyframes fadeInUp {
   from {

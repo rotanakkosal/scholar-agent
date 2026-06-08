@@ -38,6 +38,10 @@ function NewProjectInner() {
   const presetStrategies = strategiesParam
     ? strategiesParam.split(",").filter(Boolean)
     : ["keyword", "citation"];
+  const yearFromParam = searchParams.get("yearFrom");
+  const yearToParam = searchParams.get("yearTo");
+  const presetYearFrom = yearFromParam && Number(yearFromParam) ? Number(yearFromParam) : null;
+  const presetYearTo = yearToParam && Number(yearToParam) ? Number(yearToParam) : null;
   const autorun = searchParams.get("run") === "1";
 
   const activityRef = useRef<HTMLDivElement>(null);
@@ -60,6 +64,8 @@ function NewProjectInner() {
         topK: presetTopK,
         maxRounds: presetRounds,
         strategies: presetStrategies,
+        yearFrom: presetYearFrom,
+        yearTo: presetYearTo,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,7 +143,7 @@ function NewProjectInner() {
       </Link>
 
       <QueryForm
-        key={`${presetQuery}|${presetTopK}|${presetRounds}|${presetStrategies.join(",")}`}
+        key={`${presetQuery}|${presetTopK}|${presetRounds}|${presetStrategies.join(",")}|${presetYearFrom}|${presetYearTo}`}
         running={state.running}
         onStart={beginRun}
         onCancel={cancel}
@@ -145,6 +151,8 @@ function NewProjectInner() {
         initialTopK={presetTopK}
         initialMaxRounds={presetRounds}
         initialStrategies={presetStrategies}
+        initialYearFrom={presetYearFrom}
+        initialYearTo={presetYearTo}
       />
 
       {state.error && (
