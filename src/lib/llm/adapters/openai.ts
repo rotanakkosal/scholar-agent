@@ -3,7 +3,8 @@ import { RetryableHttpError, isRetryableLLMError, retryableStatus, withRetry } f
 
 /**
  * OpenAI-compatible adapter (POST /v1/chat/completions). Works with vLLM,
- * LM Studio, llama.cpp server, LiteLLM, and Ollama's /v1 endpoint. Structured
+ * LM Studio, llama.cpp server, LiteLLM, and any other OpenAI-compatible
+ * endpoint (including local servers). Structured
  * output via `response_format: { type: "json_schema", ... }` — we keep
  * `strict: false` for broad server compatibility and rely on the Zod
  * validate-and-repair loop as the real guarantee.

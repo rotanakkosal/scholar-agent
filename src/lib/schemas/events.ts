@@ -2,7 +2,6 @@ import { z } from "zod";
 import { PaperSource } from "./paper";
 import { PaperSummarySchema } from "./summary";
 import { JudgeVerdictSchema, ClaimFaithfulnessSchema } from "./judge";
-import { JobStatus } from "./job";
 import { DisagreementSchema } from "./disagreement";
 
 /**
@@ -10,7 +9,6 @@ import { DisagreementSchema } from "./disagreement";
  * logged by the CLI. The `ts` field is an ISO timestamp added by the emitter.
  */
 export const ProgressEventSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("job_status"), status: JobStatus, ts: z.string() }),
   z.object({
     type: z.literal("phase"),
     phase: z.enum(["search", "evaluation", "final"]),

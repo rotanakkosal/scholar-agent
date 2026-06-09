@@ -17,15 +17,15 @@ function num(value: string | undefined, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-export type LLMProvider = "ollama" | "openai";
+export type LLMProvider = "openai";
 
 export const config = {
   llm: {
-    provider: (process.env.LLM_PROVIDER as LLMProvider) || "ollama",
-    baseUrl: process.env.LLM_BASE_URL || "http://localhost:11434",
+    provider: (process.env.LLM_PROVIDER as LLMProvider) || "openai",
+    baseUrl: process.env.LLM_BASE_URL || "http://localhost:8000/v1",
     apiKey: process.env.LLM_API_KEY || undefined,
-    summaryModel: process.env.SUMMARY_MODEL || "qwen2.5:7b-instruct",
-    judgeModel: process.env.JUDGE_MODEL || "gemma2:9b",
+    summaryModel: process.env.SUMMARY_MODEL || "qwen3-14b",
+    judgeModel: process.env.JUDGE_MODEL || "gemma-4-e2b",
     numCtx: num(process.env.LLM_NUM_CTX, 8192),
     timeoutMs: num(process.env.LLM_TIMEOUT_MS, 120_000),
     /** Disable model "thinking" traces (e.g. Qwen3 <think>…</think>) for clean JSON. */
@@ -40,10 +40,10 @@ export const config = {
     provider:
       (process.env.JUDGE_LLM_PROVIDER as LLMProvider) ||
       (process.env.LLM_PROVIDER as LLMProvider) ||
-      "ollama",
-    baseUrl: process.env.JUDGE_LLM_BASE_URL || process.env.LLM_BASE_URL || "http://localhost:11434",
+      "openai",
+    baseUrl: process.env.JUDGE_LLM_BASE_URL || process.env.LLM_BASE_URL || "http://localhost:8000/v1",
     apiKey: process.env.JUDGE_LLM_API_KEY || process.env.LLM_API_KEY || undefined,
-    model: process.env.JUDGE_MODEL || process.env.SUMMARY_MODEL || "gemma2:9b",
+    model: process.env.JUDGE_MODEL || process.env.SUMMARY_MODEL || "gemma-4-e2b",
     disableThinking: /^true$/i.test(process.env.JUDGE_LLM_DISABLE_THINKING ?? ""),
   },
   s2: {

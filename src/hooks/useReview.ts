@@ -127,8 +127,6 @@ export function useReview() {
         body: JSON.stringify(params),
         signal: ac.signal,
       });
-      const jobId = res.headers.get("X-Job-Id") ?? undefined;
-      setState((s) => ({ ...s, jobId }));
       if (!res.ok || !res.body) {
         throw new Error(`request failed (${res.status})`);
       }

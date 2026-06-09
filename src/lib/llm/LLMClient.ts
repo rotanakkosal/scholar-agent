@@ -1,7 +1,7 @@
 /**
- * Provider-agnostic LLM interface. Concrete adapters (Ollama-native,
- * OpenAI-compatible) implement this so the rest of the codebase never depends
- * on a specific server API. Swap providers via config — no code changes.
+ * Provider-agnostic LLM interface. The OpenAI-compatible adapter implements
+ * this so the rest of the codebase never depends on a specific server API.
+ * Point it at any OpenAI-compatible endpoint via config, no code changes.
  */
 
 export interface ChatMessage {

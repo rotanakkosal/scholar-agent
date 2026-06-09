@@ -1,16 +1,5 @@
 import { z } from "zod";
 import { PaperSource } from "./paper";
-import { PaperSummarySchema } from "./summary";
-
-export const JobStatus = z.enum([
-  "queued",
-  "searching",
-  "summarizing",
-  "done",
-  "error",
-  "canceled",
-]);
-export type JobStatus = z.infer<typeof JobStatus>;
 
 /** Parameters that define a literature-review run. */
 export const JobParamsSchema = z.object({
@@ -28,14 +17,3 @@ export const JobParamsSchema = z.object({
   yearTo: z.number().int().nullable().default(null),
 });
 export type JobParams = z.infer<typeof JobParamsSchema>;
-
-export const ReviewJobSchema = z.object({
-  id: z.string(),
-  params: JobParamsSchema,
-  status: JobStatus,
-  createdAt: z.string(),
-  finishedAt: z.string().nullable().default(null),
-  result: z.array(PaperSummarySchema).nullable().default(null),
-  error: z.string().nullable().default(null),
-});
-export type ReviewJob = z.infer<typeof ReviewJobSchema>;
